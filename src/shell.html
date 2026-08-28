@@ -28,6 +28,8 @@
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
   --sky-1:#F3EDE1;
   --sky-2:#DED2BE;
+  --lamp:#B07A14;
+  --lamp-soft:#FAF0D2;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -47,6 +49,8 @@
     --shadow-s:0 1px 2px rgba(0,0,0,.5);
     --shadow-m:0 1px 2px rgba(0,0,0,.45), 0 14px 30px -16px rgba(0,0,0,.8);
     --shadow-l:0 2px 4px rgba(0,0,0,.5), 0 32px 64px -28px rgba(0,0,0,.9);
+    --lamp:#F5CC63;
+    --lamp-soft:#3B300F;
   }
 }
 :root[data-theme="dark"]{
@@ -66,6 +70,8 @@
   --shadow-s:0 1px 2px rgba(0,0,0,.5);
   --shadow-m:0 1px 2px rgba(0,0,0,.45), 0 14px 30px -16px rgba(0,0,0,.8);
   --shadow-l:0 2px 4px rgba(0,0,0,.5), 0 32px 64px -28px rgba(0,0,0,.9);
+  --lamp:#F5CC63;
+  --lamp-soft:#3B300F;
 }
 
 *{box-sizing:border-box}
@@ -129,15 +135,24 @@ button{font:inherit; color:inherit}
 .btn-block{width:100%}
 
 .rail-h{
-  display:flex; align-items:baseline; gap:8px; padding:0 2px;
+  display:flex; align-items:center; gap:7px; padding:2px 2px; width:100%;
+  border:0; background:transparent; cursor:pointer; text-align:left;
   font-size:12px; font-weight:600; letter-spacing:.1em;
   text-transform:uppercase; color:var(--muted); font-family:var(--f-mono);
 }
-.rail-h span{margin-left:auto; text-transform:none; letter-spacing:0; font-size:11.5px}
+.rail-h:hover{color:var(--ink-2)}
+.rail-h #inv-count{margin-left:auto; text-transform:none; letter-spacing:0; font-size:11.5px}
+.rail-caret{
+  display:inline-block; font-size:10px; line-height:1;
+  transition:transform .18s ease; transform-origin:center;
+}
+.rail-h[aria-expanded="false"] .rail-caret{transform:rotate(-90deg)}
+body.inv-collapsed #inv-list{display:none}
+body.inv-collapsed .rail{gap:10px}
 
 #inv-list{
-  flex:1; overflow-y:auto; overflow-x:hidden;
-  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+  display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px;
   align-content:start; padding:2px;
 }
 .inv-empty{
@@ -145,17 +160,18 @@ button{font:inherit; color:inherit}
   padding:22px 10px; text-align:center; line-height:1.6;
   border:1px dashed var(--line); border-radius:var(--r-m);
 }
-.inv-card{position:relative}
+.inv-card{position:relative; min-width:0}
 .inv-take{
-  width:100%; border:1px solid var(--line-soft); background:var(--surface-2);
+  width:100%; min-width:0; border:1px solid var(--line-soft); background:var(--surface-2);
   border-radius:var(--r-m); cursor:pointer; padding:8px 6px 7px;
-  display:flex; flex-direction:column; align-items:center; gap:2px;
+  display:flex; flex-direction:column; align-items:stretch; gap:4px;
   transition:border-color .12s ease, transform .12s ease;
 }
 .inv-take:hover{border-color:var(--accent); transform:translateY(-2px)}
-.inv-take img{width:100%; aspect-ratio:1; object-fit:contain; display:block}
+.inv-take img{width:100%; aspect-ratio:1; object-fit:contain; display:block; min-width:0}
 .inv-name{
-  font-size:11.5px; color:var(--ink-2); max-width:100%;
+  font-size:11.5px; color:var(--ink-2);
+  display:block; width:100%; min-width:0; text-align:center;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .inv-del{
@@ -176,6 +192,7 @@ button{font:inherit; color:inherit}
 }
 .badge-c{background:var(--teal-soft); color:var(--teal)}
 .badge-m{background:var(--accent-soft); color:var(--accent)}
+.badge-l{background:var(--lamp-soft); color:var(--lamp)}
 
 .rail-foot{display:flex; gap:6px}
 .rail-foot .btn{flex:1; padding:8px 6px; font-size:12.5px; font-weight:500; border-radius:10px}
@@ -252,6 +269,69 @@ body.panel-open .panel{display:flex}
 .trait b{display:block; font-size:14px; font-weight:600; color:var(--ink)}
 .trait small{display:block; font-size:12px; color:var(--muted); line-height:1.5}
 .pop-note{font-size:11.5px; color:var(--muted); line-height:1.5; border-top:1px solid var(--line-soft); padding-top:10px}
+
+/* 전등 */
+.lamp{
+  width:300px; padding:12px 14px 13px; border-radius:var(--r-l);
+  background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow-l);
+  display:flex; flex-direction:column; gap:11px;
+}
+.lamp[hidden]{display:none}
+.lamp-top{display:flex; align-items:center; gap:9px}
+.lamp-title{font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.lamp-state{margin-left:auto; font-size:11.5px; color:var(--muted); font-family:var(--f-mono)}
+.lamp-switch{
+  flex:none; width:46px; height:26px; border-radius:999px; cursor:pointer;
+  border:1px solid var(--line); background:var(--surface-2); padding:2px;
+  transition:background .16s ease, border-color .16s ease;
+}
+.lamp-switch span{
+  display:block; width:20px; height:20px; border-radius:50%;
+  background:var(--muted); transition:transform .16s ease, background .16s ease;
+}
+.lamp-switch[aria-checked="true"]{background:var(--lamp-soft); border-color:var(--lamp)}
+.lamp-switch[aria-checked="true"] span{transform:translateX(20px); background:var(--lamp)}
+.lamp-body{display:flex; flex-direction:column; gap:9px; transition:opacity .16s ease}
+.lamp-body.is-off{opacity:.4}
+.lamp-row{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--muted)}
+.lamp-row label, .lamp-row > span{width:32px; flex:none}
+#lamp-bright{flex:1; width:auto}
+.tint{display:flex; gap:7px}
+.tint button{
+  width:24px; height:24px; border-radius:50%; cursor:pointer; padding:0;
+  border:2px solid transparent; box-shadow:var(--shadow-s);
+}
+.tint button[aria-pressed="true"]{border-color:var(--ink)}
+.tint button[data-tint="warm"]{background:#FFC069}
+.tint button[data-tint="white"]{background:#FFF4E2}
+.tint button[data-tint="pink"]{background:#FFA3C4}
+.tint button[data-tint="cool"]{background:#9FC8FF}
+
+/* 터치용 캐릭터 조작기 */
+.pad{left:20px; bottom:calc(var(--sheet, 0px) + 20px); touch-action:none}
+.pad[hidden], .padbtns[hidden]{display:none}
+.pad-ring{
+  width:118px; height:118px; border-radius:50%;
+  background:color-mix(in srgb, var(--surface) 72%, transparent);
+  border:1px solid var(--line); box-shadow:var(--shadow-m);
+  display:grid; place-items:center;
+}
+.pad-nub{
+  width:48px; height:48px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--line);
+  box-shadow:var(--shadow-m);
+  transition:transform .06s linear;
+}
+.padbtns{
+  right:20px; bottom:calc(var(--sheet, 0px) + 20px);
+  display:flex; flex-direction:column; gap:10px; touch-action:none;
+}
+.padbtns button{
+  width:76px; height:56px; border-radius:20px; cursor:pointer;
+  border:1px solid var(--line); background:var(--surface);
+  box-shadow:var(--shadow-m); font-size:14px; font-weight:600; color:var(--ink-2);
+}
+.padbtns button:active{background:var(--accent-soft); color:var(--accent); transform:scale(.96)}
 
 /* 플레이어 */
 .player{
@@ -339,10 +419,9 @@ body.panel-open .panel{display:flex}
 
 /* 재생 중 */
 .nowplaying{
-  left:50%; top:18px; transform:translateX(-50%);
-  display:flex; align-items:center; gap:10px; padding:6px 8px 6px 6px;
-  background:var(--surface); border:1px solid var(--line);
-  border-radius:999px; box-shadow:var(--shadow-l); max-width:min(360px, 60vw);
+  flex:none; display:flex; align-items:center; gap:9px; padding:6px 8px 6px 6px;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  border-radius:999px;
 }
 .nowplaying[hidden]{display:none}
 .nowplaying button{
@@ -355,6 +434,84 @@ body.panel-open .panel{display:flex}
 .np-txt{min-width:0; display:flex; flex-direction:column; line-height:1.25; padding-right:2px}
 .np-txt b{font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .np-txt small{font-size:10.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* 말풍선 */
+.bubble{
+  transform:translate(-50%,-100%);
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  padding:8px 12px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--line);
+  box-shadow:var(--shadow-l); font-size:13.5px; font-weight:600; color:var(--ink);
+  white-space:nowrap; animation:bub .18s cubic-bezier(.2,.8,.3,1);
+}
+.bubble[hidden]{display:none}
+.bubble::after{
+  content:''; position:absolute; left:50%; bottom:-6px; width:10px; height:10px;
+  transform:translateX(-50%) rotate(45deg);
+  background:var(--surface); border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.bubble kbd{font-size:10.5px}
+.bubble[hidden]{display:none}
+@keyframes bub{from{opacity:0; transform:translate(-50%,-90%)} to{opacity:1; transform:translate(-50%,-100%)}}
+.pianochip{box-shadow:var(--shadow-l)}
+.pianochip[hidden]{display:none}
+
+/* 피아노 */
+.piano{
+  position:fixed; left:0; right:0; bottom:0; z-index:70;
+  background:var(--surface); border-top:1px solid var(--line);
+  box-shadow:0 -12px 40px -20px rgba(0,0,0,.5);
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  display:flex; flex-direction:column; gap:10px;
+  animation:pianoUp .2s cubic-bezier(.2,.8,.3,1);
+}
+.piano[hidden]{display:none}
+@keyframes pianoUp{from{transform:translateY(40px); opacity:0} to{transform:none; opacity:1}}
+.piano-bar{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.piano-title{font-family:var(--f-display); font-size:16px; margin-right:4px}
+.piano-oct{
+  border:1px solid var(--line); background:var(--surface-2); cursor:pointer;
+  width:28px; height:28px; border-radius:8px; font-size:10px; color:var(--ink-2);
+}
+.piano-oct:disabled{opacity:.35; cursor:not-allowed}
+.piano-octv{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); min-width:52px; text-align:center}
+.piano-ped, .piano-x{
+  border:1px solid var(--line); background:var(--surface-2); cursor:pointer;
+  padding:6px 12px; border-radius:999px; font-size:12.5px; color:var(--ink-2);
+  display:inline-flex; align-items:center; gap:6px;
+}
+.piano-ped{margin-left:auto; touch-action:none}
+.piano-ped.is-down{background:var(--teal-soft); color:var(--teal); border-color:transparent}
+.piano-x:hover{border-color:var(--muted)}
+.keys{
+  position:relative; height:132px; touch-action:none;
+  display:flex; gap:0; --wc:10;
+}
+.pk{
+  position:relative; border:0; cursor:pointer; padding:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  gap:2px; padding-bottom:9px;
+}
+.pk-w{
+  flex:1 1 0; height:100%;
+  background:linear-gradient(#FFFFFF, #F2F3F8);
+  border:1px solid #C9CEDF; border-radius:0 0 7px 7px;
+  margin-right:-1px; color:#8A90A6;
+}
+.pk-w.is-down{background:linear-gradient(#F6D9AE, #EFC98C); border-color:#D9A960; color:#7A5A22}
+.pk-b{
+  position:absolute; top:0; z-index:2;
+  width:6.4%; height:60%;
+  background:linear-gradient(#3A3F52, #212534);
+  border-radius:0 0 6px 6px; color:#AEB5CC;
+  box-shadow:0 3px 5px -1px rgba(0,0,0,.45);
+}
+.pk-b.is-down{background:linear-gradient(#B98A3E, #8E6522); color:#FFEBC4}
+.pk-key{font-family:var(--f-mono); font-size:11px; font-weight:500}
+.pk-n{font-size:10px; opacity:.7}
+.pk-b .pk-key{font-size:9.5px}
+body.piano-open .dock, body.piano-open .hints,
+body.piano-open .charbadge, body.piano-open .nowplaying{display:none}
 
 /* 확인 다이얼로그 */
 .askveil{
@@ -494,32 +651,103 @@ kbd{
 }
 .dropcard small{display:block; font-family:var(--f-body); font-size:13px; color:var(--muted); margin-top:5px}
 #toast{
-  position:fixed; left:50%; bottom:96px; z-index:95; transform:translate(-50%,12px);
+  position:fixed; left:50%; top:calc(16px + env(safe-area-inset-top, 0px)); bottom:auto;
+  z-index:95; transform:translate(-50%,-140%);
   padding:10px 19px; border-radius:999px; background:var(--ink); color:var(--surface);
   font-size:13.5px; box-shadow:var(--shadow-l);
-  opacity:0; visibility:hidden; transition:opacity .18s ease, transform .18s ease;
+  opacity:0; visibility:hidden;
+  transition:opacity .2s ease, transform .24s cubic-bezier(.2,.85,.3,1);
   max-width:min(90vw,520px); text-align:center;
 }
 #toast.is-on{opacity:1; visibility:visible; transform:translate(-50%,0)}
 
 /* --------------------------------------------------------------- 반응형 */
 @media (max-width:900px){
+  /* 보관함을 아래쪽 시트로 */
   .rail{
-    left:10px; right:10px; bottom:10px; top:auto; width:auto;
-    max-height:46vh; padding:12px;
+    left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+    top:auto; width:auto; height:auto;
+    padding:10px 10px 11px; gap:9px; border-radius:var(--r-l);
   }
-  #inv-list{grid-template-columns:repeat(auto-fill,minmax(86px,1fr)); max-height:30vh}
-  .panel-wrap{right:10px; top:10px}
+  .brand{display:none}
+  .rail .btn-primary{padding:10px 14px; font-size:14px}
+  .rail-h{font-size:11px}
+  body.inv-collapsed .rail{gap:8px}
+  #inv-list{
+    display:flex; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+    gap:8px; padding:2px 2px 4px; scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  .inv-card{flex:0 0 84px; scroll-snap-align:start}
+  .inv-take{padding:6px 4px 5px}
+  .inv-name{font-size:10.5px}
+  .inv-del{opacity:1; width:19px; height:19px}
+  .inv-empty{flex:1 1 auto; padding:16px 10px; font-size:12px}
+  .badge{font-size:8.5px; padding:2px 4px}
+
+  /* 방 꾸미기 */
+  .panel-wrap{
+    right:8px; top:calc(8px + env(safe-area-inset-top, 0px));
+    align-items:flex-end; max-width:calc(100vw - 16px);
+  }
+  .panel{width:min(280px, calc(100vw - 20px)); max-height:70vh; overflow-y:auto}
+
+  /* 조작 도크는 시트 위에 */
+  .dock{
+    left:8px; right:8px; bottom:auto;
+    top:calc(58px + env(safe-area-inset-top, 0px));
+    gap:8px;
+  }
+  .dock > *{max-width:100%}
+  .objbar{border-radius:var(--r-m); padding:7px 8px; gap:4px}
+  .objbar button{padding:7px 9px; font-size:12px}
+  .objbar-name{max-width:76px; font-size:12px}
+  .size-ctl{gap:6px; padding:0 4px}
+  .size-ctl label{display:none}
+  input[type=range]{width:78px}
+  .player, .popover, .lamp{width:100%}
+  .pl-list{max-height:132px}
+
   .hints, .charbadge{display:none}
-  .dock{left:10px; right:10px; bottom:auto; top:60px}
-  .dock > *{max-width:calc(100vw - 24px)}
-  .objbar{border-radius:var(--r-m)}
-  .player, .popover{width:min(340px, calc(100vw - 24px))}
-  .nowplaying{top:auto; bottom:calc(46vh + 20px)}
-  #toast{bottom:auto; top:auto; bottom:calc(46vh + 62px)}
+  #toast{top:calc(12px + env(safe-area-inset-top, 0px))}
+
+  /* 터치 조작기는 시트 위로 */
+  .pad{left:14px; bottom:calc(var(--sheet, 190px) + 14px)}
+  .padbtns{right:14px; bottom:calc(var(--sheet, 190px) + 14px)}
+  .pad-ring{width:106px; height:106px}
+  .pad-nub{width:44px; height:44px}
+  .padbtns button{width:70px; height:50px; border-radius:18px; font-size:13px}
+
+  /* 스튜디오는 전체 화면 */
   .studio{grid-template-columns:1fr}
   .studio-veil{display:none}
   .studio-panel{border-left:0}
+  .preview-wrap{height:210px}
+
+  /* 피아노 */
+  .keys{height:112px}
+  .pk-n{display:none}
+  .piano-title{font-size:14px}
+  .piano-ped, .piano-x{padding:5px 10px; font-size:11.5px}
+}
+
+/* 손가락으로 쓰는 화면 */
+@media (pointer: coarse){
+  .hints{display:none}
+  .inv-del{opacity:1}
+  .pl-x{opacity:1}
+  .btn, .chip-btn, .objbar button, .padbtns button{touch-action:manipulation}
+}
+
+/* 가로로 눕힌 작은 화면 */
+@media (max-width:900px) and (orientation:landscape){
+  .rail{right:auto; width:238px; top:8px; bottom:8px; height:auto}
+  #inv-list{flex-wrap:wrap; overflow-y:auto; overflow-x:hidden; max-height:none}
+  .inv-card{flex:0 0 calc(50% - 4px)}
+  .dock{left:254px; right:8px; top:8px}
+  .pad{left:254px; bottom:14px}
+  .padbtns{right:14px; bottom:14px}
+  #toast{bottom:14px}
 }
 </style>
 
@@ -532,15 +760,21 @@ kbd{
     <h1>복셀 공방<small>my voxel room</small></h1>
   </div>
 
-  <button class="btn btn-primary btn-block" type="button" data-open-file>그림으로 오브제 만들기</button>
+  <button class="btn btn-primary btn-block" type="button" data-open-file>사진으로 오브제 만들기</button>
 
-  <div class="rail-h">보관함 <span id="inv-count"></span></div>
+  <button class="rail-h" type="button" id="inv-toggle" aria-expanded="true" aria-controls="inv-list">
+    <span class="rail-caret" aria-hidden="true">▾</span>보관함
+    <span id="inv-count"></span>
+  </button>
   <div id="inv-list"></div>
 
-  <div class="rail-foot">
-    <button class="btn btn-ghost" type="button" id="export">방 내보내기</button>
-    <button class="btn btn-ghost" type="button" id="import">불러오기</button>
+  <!-- 재생 중 -->
+  <div class="nowplaying" id="nowplaying" hidden>
+    <button class="ico ico-play" type="button" id="np-toggle" aria-label="재생/일시정지"></button>
+    <span class="np-txt"><b id="np-name"></b><small id="np-from"></small></span>
+    <button type="button" id="np-stop" aria-label="정지">✕</button>
   </div>
+
 </aside>
 
 <!-- 방 설정 -->
@@ -565,6 +799,10 @@ kbd{
       </div>
     </div>
     <div class="panel-row">
+      <button class="btn btn-ghost" type="button" id="export">방 내보내기</button>
+      <button class="btn btn-ghost" type="button" id="import">불러오기</button>
+    </div>
+    <div class="panel-row">
       <button class="btn btn-ghost" type="button" id="cam-reset">시점 리셋</button>
       <button class="btn btn-ghost danger" type="button" id="wipe">방 비우기</button>
     </div>
@@ -586,7 +824,39 @@ kbd{
       <input type="checkbox" id="tr-music">
       <span><b>음악재생</b><small>선택하면 플레이리스트가 열리고 음악이 배경으로 흐릅니다.</small></span>
     </label>
+    <label class="trait">
+      <input type="checkbox" id="tr-lamp">
+      <span><b>전등</b><small>불을 껐다 켤 수 있고, 켜면 주변이 밝아집니다.</small></span>
+    </label>
+    <label class="trait">
+      <input type="checkbox" id="tr-piano">
+      <span><b>피아노</b><small>다가가서 연주하면 화면에 건반이 뜨고 키보드로 칠 수 있습니다.</small></span>
+    </label>
     <p class="pop-note">속성은 보관함 항목에 붙습니다. 같은 오브제를 여러 개 꺼내면 모두 같은 속성을 갖습니다.</p>
+  </div>
+
+  <!-- 전등 -->
+  <div class="lamp" id="lamp" hidden>
+    <div class="lamp-top">
+      <span class="lamp-title" id="lamp-title">전등</span>
+      <span class="lamp-state" id="lamp-state">켜짐</span>
+      <button class="lamp-switch" type="button" id="lamp-switch" role="switch" aria-checked="true" aria-label="불 켜고 끄기"><span></span></button>
+    </div>
+    <div class="lamp-body" id="lamp-body">
+      <div class="lamp-row">
+        <label for="lamp-bright">밝기</label>
+        <input type="range" id="lamp-bright" min="0.2" max="2" step="0.05" value="1">
+      </div>
+      <div class="lamp-row">
+        <span>불빛</span>
+        <div class="tint">
+          <button type="button" data-tint="warm"  aria-pressed="true"  aria-label="노란 불"></button>
+          <button type="button" data-tint="white" aria-pressed="false" aria-label="흰 불"></button>
+          <button type="button" data-tint="pink"  aria-pressed="false" aria-label="분홍 불"></button>
+          <button type="button" data-tint="cool"  aria-pressed="false" aria-label="푸른 불"></button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 음악 플레이어 -->
@@ -610,6 +880,8 @@ kbd{
     </div>
   </div>
 
+  <button class="chip-btn pianochip" id="pianochip" type="button" hidden>연주하기</button>
+
   <div class="charhint" id="charhint" hidden>
     <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 걷기 · <kbd>Space</kbd> 점프 · <kbd>Z</kbd> 앉기
   </div>
@@ -632,6 +904,20 @@ kbd{
   </div>
 </div>
 
+<!-- 다가가면 뜨는 말풍선 -->
+<button class="ui bubble" id="bubble" type="button" hidden>
+  <span id="bubble-label">사용하기</span><kbd id="bubble-key">E</kbd>
+</button>
+
+<!-- 터치용 캐릭터 조작기 -->
+<div class="ui pad" id="touchpad" hidden>
+  <div class="pad-ring"><span class="pad-nub" id="pad-nub"></span></div>
+</div>
+<div class="ui padbtns" id="touchbtns" hidden>
+  <button type="button" id="btn-sit">앉기</button>
+  <button type="button" id="btn-jump">점프</button>
+</div>
+
 <!-- 조작 중인 캐릭터 -->
 <div class="ui charbadge" id="charbadge" hidden>
   <span class="cb-dot"></span>
@@ -639,16 +925,22 @@ kbd{
   <button type="button" id="charbadge-release">해제</button>
 </div>
 
-<!-- 재생 중 -->
-<div class="ui nowplaying" id="nowplaying" hidden>
-  <button class="ico ico-play" type="button" id="np-toggle" aria-label="재생/일시정지"></button>
-  <span class="np-txt"><b id="np-name"></b><small id="np-from"></small></span>
-  <button type="button" id="np-stop" aria-label="정지">✕</button>
-</div>
-
 <div class="ui hints">
   <b>끌기</b> 옮기기 · <b>빈 곳 끌기</b> 시점 돌리기<br>
   <b>휠</b> 확대 (오브제 위에선 크기) · <kbd>R</kbd> 회전 · <kbd>Del</kbd> 치우기
+</div>
+
+<!-- 피아노 -->
+<div class="piano" id="piano" hidden>
+  <div class="piano-bar">
+    <span class="piano-title" id="piano-title">피아노</span>
+    <button class="piano-oct" type="button" id="oct-down" aria-label="한 옥타브 아래">◀</button>
+    <span class="piano-octv" id="oct-v">4옥타브</span>
+    <button class="piano-oct" type="button" id="oct-up" aria-label="한 옥타브 위">▶</button>
+    <button class="piano-ped" type="button" id="pedal">페달 <kbd>Space</kbd></button>
+    <button class="piano-x" type="button" id="piano-close">그만두기 <kbd>Esc</kbd></button>
+  </div>
+  <div class="keys" id="keys"></div>
 </div>
 
 <!-- 확인 다이얼로그 (샌드박스에서 window.confirm 이 막혀 직접 만든다) -->
@@ -697,14 +989,14 @@ kbd{
         <span class="ctrl-h">입체 방식</span>
         <div class="seg" role="group" aria-label="입체 방식">
           <button type="button" data-mode="inflate" aria-pressed="true"
-            data-note="실루엣 안쪽으로 갈수록 두꺼워집니다. 캐릭터나 손그림에 가장 잘 맞습니다.">부풀리기</button>
+            data-note="실루엣 안쪽으로 갈수록 두꺼워집니다. 인물·물건 사진이나 손그림에 가장 잘 맞습니다.">부풀리기</button>
           <button type="button" data-mode="flat" aria-pressed="false"
-            data-note="일정한 두께의 판으로 밀어냅니다. 로고·아이콘처럼 윤곽이 분명한 그림에 좋습니다.">판</button>
+            data-note="일정한 두께의 판으로 밀어냅니다. 로고·아이콘처럼 윤곽이 분명한 이미지에 좋습니다.">판</button>
           <button type="button" data-mode="relief" aria-pressed="false"
-            data-note="밝은 부분이 튀어나옵니다. 음영이 있는 그림이나 사진에 어울립니다.">릴리프</button>
+            data-note="밝은 부분이 튀어나옵니다. 음영이 살아 있는 사진에 어울립니다.">릴리프</button>
         </div>
       </div>
-      <p class="note" id="mode-note">실루엣 안쪽으로 갈수록 두꺼워집니다. 캐릭터나 손그림에 가장 잘 맞습니다.</p>
+      <p class="note" id="mode-note">실루엣 안쪽으로 갈수록 두꺼워집니다. 인물·물건 사진이나 손그림에 가장 잘 맞습니다.</p>
 
       <div class="rule"></div>
 
@@ -724,7 +1016,7 @@ kbd{
 </aside>
 
 <div id="dropveil">
-  <div class="dropcard">여기에 그림을 놓으세요<small>PNG · JPG · WEBP — 방 파일(.json)도 됩니다</small></div>
+  <div class="dropcard">여기에 사진을 놓으세요<small>PNG · JPG · WEBP — 방 파일(.json)도 됩니다</small></div>
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
