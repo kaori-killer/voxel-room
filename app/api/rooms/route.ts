@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DEFAULT_ROOM_TITLE } from '@/domain/constants';
-import { emptyRoom, roomTitleSchema } from '@/domain/roomSchema';
+import { roomTitleSchema, seededRoom } from '@/domain/roomSchema';
 import { buildRoomId } from '@/lib/id';
 import { jsonError, jsonOk, readJsonBody } from '@/lib/http';
 import { logger } from '@/lib/logger';
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       id: buildRoomId(),
       title: parsed.data.title ?? DEFAULT_ROOM_TITLE,
       ownerKeyHash: parsed.data.ownerKeyHash,
-      room: emptyRoom(),
+      room: seededRoom(),
     });
     return jsonOk({ meta: stored.meta }, 201);
   } catch (error) {
