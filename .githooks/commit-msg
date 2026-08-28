@@ -1,0 +1,41 @@
+#!/bin/sh
+# docs/conventions/commit.md 를 강제한다.
+# 켜기: git config core.hooksPath .githooks
+set -e
+MSG_FILE="$1"
+
+perl -e '
+use strict; use warnings; use utf8;
+open(my $fh, "<:encoding(UTF-8)", $ARGV[0]) or exit 0;
+my @lines = <$fh>; close $fh;
+@lines = grep { $_ !~ /^\s*#/ } @lines;
+chomp @lines;
+my $header = shift(@lines) // "";
+my @fail;
+
+my $types = "feat|refactor|fix|test|docs|chore|style|revert|hotfix";
+push @fail, "type 이 없거나 허용 목록 밖입니다 (허용: $types)"
+  unless $header =~ /^($types)(\([^)]+\))?: .+/;
+push @fail, "type 은 소문자여야 합니다"
+  if $header =~ /^[A-Z]/;
+push @fail, "subject 는 마침표로 끝낼 수 없습니다"
+  if $header =~ /\.\s*$/;
+push @fail, sprintf("header 는 100자 이내여야 합니다 (현재 %d자)", length($header))
+  if length($header) > 100;
+
+for my $l (@lines) {
+  next if $l =~ /^\s*$/;
+  push @fail, "footer 는 쓸 수 없습니다: $l"
+    if $l =~ /^(BREAKING CHANGE|[A-Za-z][A-Za-z-]*:\s)/ || $l =~ /^(Closes|Refs|Fixes)\s+#/;
+  push @fail, sprintf("body 는 한 줄당 50자 이내여야 합니다 (현재 %d자): %s", length($l), $l)
+    if length($l) > 50;
+}
+
+if (@fail) {
+  print STDERR "\n커밋 메시지가 규칙에 맞지 않습니다 (docs/conventions/commit.md)\n\n";
+  print STDERR "  · $_\n" for @fail;
+  print STDERR "\n  형식: type(scope): subject\n";
+  print STDERR "  예시: fix(voxel-room): 보관함 카드 크기가 이름 길이에 따라 달라지던 문제 수정\n\n";
+  exit 1;
+}
+' "$MSG_FILE"
