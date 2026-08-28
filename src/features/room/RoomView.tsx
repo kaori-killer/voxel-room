@@ -5,13 +5,18 @@ import { CarveStudio } from '@/features/studio/CarveStudio';
 import { InventoryRail } from '@/features/inventory/InventoryRail';
 import { ObjectBar } from '@/features/room/ObjectBar';
 import { RoomSettingsPanel } from '@/features/room/RoomSettingsPanel';
+import { TraitControls } from '@/features/room/TraitControls';
+import { InteractBubble } from '@/features/room/InteractBubble';
+import { PianoPanel } from '@/features/room/PianoPanel';
+import { MusicPanel } from '@/features/room/MusicPanel';
+import { NowPlaying } from '@/features/room/NowPlaying';
 import { ConfirmDialog } from '@/features/shared/ConfirmDialog';
 import { Toast } from '@/features/shared/Toast';
 import { useRoomController } from '@/hooks/useRoomController';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useRoomKeyboard } from '@/hooks/useRoomKeyboard';
 import { saveRoom } from '@/api/roomsClient';
-import type { RoomMetaType, RoomType } from '@/domain/types';
+import type { LampStateType, RoomMetaType, RoomType, TraitKeyType } from '@/domain/types';
 import { hashOwnerKey, readOwnerKey } from '@/store/ownerKey';
 import { logger } from '@/lib/logger';
 import styles from './room.module.css';
@@ -22,17 +27,27 @@ export type RoomViewProps = {
   shared: boolean;
 };
 
+type OpenPanelType = { kind: 'piano'; itemId: string; name: string } | { kind: 'music'; itemId: string } | null;
+
 export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
   const [ownerKey, setOwnerKey] = useState<string | null>(null);
   const [ownerResolved, setOwnerResolved] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [openPanel, setOpenPanel] = useState<OpenPanelType>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [lampState, setLampState] = useState<LampStateType | null>(null);
+  const [touch, setTouch] = useState(false);
   const railRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setOwnerKey(readOwnerKey(meta.id));
     setOwnerResolved(true);
   }, [meta.id]);
+
+  useEffect(() => {
+    setTouch(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
 
   const canEdit = !shared || Boolean(ownerKey);
 
@@ -64,14 +79,49 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
     onReject: setToast,
   });
 
+  const { interactHint, interactItem, getLampState, handleSetLamp, musicPlayer, player, selection } = controller;
+  const selectionKey = selection?.key ?? null;
+
+  // 선택이 바뀌면 그 개체의 전등 상태를 다시 읽어 온다.
+  useEffect(() => {
+    setLampState(selectionKey ? getLampState(selectionKey) : null);
+  }, [selectionKey, getLampState]);
+
+  const applyLamp = useCallback(
+    (patch: Partial<LampStateType>) => {
+      if (!selectionKey) return;
+      handleSetLamp(selectionKey, patch);
+      setLampState((prev) => (prev ? { ...prev, ...patch } : prev));
+    },
+    [selectionKey, handleSetLamp],
+  );
+
+  const doInteract = useCallback(() => {
+    if (!interactHint || !interactItem) return;
+    const traits = interactItem.traits;
+    if (traits.piano) {
+      setOpenPanel({ kind: 'piano', itemId: interactItem.id, name: interactItem.name });
+      return;
+    }
+    if (traits.music) {
+      void musicPlayer.toggle(interactItem.id, interactItem.tracks);
+      return;
+    }
+    if (traits.lamp) {
+      const current = getLampState(interactHint.key);
+      handleSetLamp(interactHint.key, { on: !(current?.on ?? true) });
+    }
+  }, [interactHint, interactItem, musicPlayer, getLampState, handleSetLamp]);
+
   useRoomKeyboard({
-    enabled: canEdit && !upload.image,
+    enabled: canEdit && !upload.image && openPanel === null,
     onMoveInput: controller.handleMoveInput,
     onJump: controller.handleJump,
     onToggleSit: controller.handleToggleSit,
     onRotate: controller.handleRotateSelected,
     onRemove: controller.handleRemoveSelected,
     onDeselect: () => controller.handleSelect(null),
+    onInteract: doInteract,
   });
 
   useEffect(() => {
@@ -88,6 +138,25 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
     if (pendingDelete) controller.handleDeleteItem(pendingDelete);
     setPendingDelete(null);
   }, [controller, pendingDelete]);
+
+  const handleToggleTrait = useCallback(
+    (trait: TraitKeyType, on: boolean) => {
+      if (selection) controller.handleToggleTrait(selection.itemId, trait, on);
+    },
+    [controller, selection],
+  );
+
+  // 말풍선은 편집 UI 위로 겹치지 않도록, 패널·스튜디오·설정이 열리면 감춘다.
+  const bubbleLabel =
+    interactHint && interactItem
+      ? labelFor(interactItem.traits, interactItem.id, interactHint.key, player, getLampState)
+      : null;
+  const showBubble =
+    Boolean(interactHint && bubbleLabel) && openPanel === null && !upload.image && !settingsOpen;
+
+  const panelItem = openPanel ? controller.items.find((item) => item.id === openPanel.itemId) ?? null : null;
+  const playingItem = player.itemId ? controller.items.find((item) => item.id === player.itemId) ?? null : null;
+  const playingTrack = playingItem?.tracks.find((track) => track.id === player.trackId) ?? null;
 
   return (
     <main>
@@ -134,14 +203,24 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
           onResetView={controller.handleResetView}
           onCopied={() => setToast('방 링크를 복사했습니다.')}
           onCopyFailed={(url) => setToast(`복사가 막혀 있습니다. 주소: ${url}`)}
+          onOpenChange={setSettingsOpen}
         />
       </div>
 
       <div className={`${styles.layer} ${styles.dock}`}>
-        {controller.selection && controller.selectedItem ? (
+        {canEdit && selection && controller.selectedItem ? (
+          <TraitControls
+            item={controller.selectedItem}
+            lamp={lampState}
+            onToggleTrait={handleToggleTrait}
+            onOpenMusic={() => setOpenPanel({ kind: 'music', itemId: selection.itemId })}
+            onSetLamp={applyLamp}
+          />
+        ) : null}
+        {selection && controller.selectedItem ? (
           <ObjectBar
             name={controller.selectedItem.name}
-            height={controller.selection.height}
+            height={selection.height}
             onRotate={controller.handleRotateSelected}
             onResize={controller.handleResizeSelected}
             onDuplicate={controller.handleDuplicateSelected}
@@ -150,6 +229,25 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
           />
         ) : null}
       </div>
+
+      {showBubble && interactHint && bubbleLabel ? (
+        <InteractBubble
+          label={bubbleLabel}
+          x={interactHint.screenX}
+          y={interactHint.screenY}
+          showKeyHint={!touch}
+          onInteract={doInteract}
+        />
+      ) : null}
+
+      {playingItem && playingTrack && openPanel?.kind !== 'music' ? (
+        <NowPlaying
+          trackName={playingTrack.name}
+          fromName={playingItem.name}
+          playing={player.playing}
+          onToggle={() => void musicPlayer.toggle(playingItem.id, playingItem.tracks)}
+        />
+      ) : null}
 
       {ownerResolved && shared && !canEdit ? (
         <p className={`${styles.layer} ${styles.readOnly}`}>
@@ -186,6 +284,21 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
         />
       ) : null}
 
+      {openPanel?.kind === 'piano' ? (
+        <PianoPanel title={openPanel.name} touch={touch} onClose={() => setOpenPanel(null)} />
+      ) : null}
+
+      {openPanel?.kind === 'music' && panelItem ? (
+        <MusicPanel
+          item={panelItem}
+          player={player}
+          musicPlayer={musicPlayer}
+          onSetTracks={(tracks) => controller.handleSetTracks(panelItem.id, tracks)}
+          onToast={setToast}
+          onClose={() => setOpenPanel(null)}
+        />
+      ) : null}
+
       <ConfirmDialog
         open={pendingDelete !== null}
         message="이 오브제를 보관함에서 지웁니다. 방에 놓인 것도 함께 사라집니다."
@@ -197,4 +310,17 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
       <Toast message={toast} onDismiss={() => setToast(null)} />
     </main>
   );
+}
+
+function labelFor(
+  traits: { piano?: boolean; music?: boolean; lamp?: boolean },
+  itemId: string,
+  hintKey: string,
+  player: { playing: boolean; itemId: string | null },
+  getLampState: (key: string) => LampStateType | null,
+): string | null {
+  if (traits.piano) return '연주하기';
+  if (traits.music) return player.playing && player.itemId === itemId ? '음악 끄기' : '음악 켜기';
+  if (traits.lamp) return getLampState(hintKey)?.on ? '불 끄기' : '불 켜기';
+  return null;
 }
