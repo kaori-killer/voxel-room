@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="복셀 공방">
+  <rect width="100" height="100" rx="24" fill="#101320" />
+  <polygon points="50,20 84,40 50,60 16,40" fill="#f4b45f" />
+  <polygon points="16,40 50,60 50,92 16,72" fill="#b4650c" />
+  <polygon points="84,40 50,60 50,92 84,72" fill="#8a4e08" />
+</svg>
