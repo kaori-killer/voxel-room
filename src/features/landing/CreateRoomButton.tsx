@@ -54,7 +54,7 @@ export function CreateRoomButton() {
           enterKeyHint="go"
         />
       </label>
-      <button type="submit" className="btn btn-primary" disabled={busy}>
+      <button type="submit" className={`btn btn-primary ${styles.create}`} disabled={busy}>
         {busy ? '방을 만드는 중…' : '내 방 만들기'}
       </button>
       {error ? (
