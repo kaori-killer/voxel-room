@@ -10,6 +10,7 @@ export type UseRoomKeyboardParams = {
   onRotate: (direction: number) => void;
   onRemove: () => void;
   onDeselect: () => void;
+  onInteract: () => void;
 };
 
 /**
@@ -45,6 +46,10 @@ export function useRoomKeyboard(params: UseRoomKeyboardParams): void {
       const code = event.code;
       if (code === 'Escape') {
         paramsRef.current.onDeselect();
+        return;
+      }
+      if (code === 'KeyE' || code === 'Enter') {
+        paramsRef.current.onInteract();
         return;
       }
       const move = MOVE_KEY_MAP[code];

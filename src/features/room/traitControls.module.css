@@ -1,0 +1,149 @@
+.wrap {
+  width: min(560px, calc(100vw - 320px));
+  padding: 12px 14px;
+  border-radius: var(--r-l);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-l);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
+  padding: 8px 6px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.sub {
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.sub:hover {
+  border-color: var(--muted);
+}
+
+.note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.lamp {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.lampHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lampState {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.switch {
+  margin-left: auto;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
+  padding: 2px;
+  transition: background 0.15s ease;
+}
+
+.switch > span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-s);
+  transform: translateX(0);
+  transition: transform 0.15s ease;
+}
+
+.switch[aria-checked='true'] {
+  background: var(--lamp);
+  border-color: var(--lamp);
+}
+
+.switch[aria-checked='true'] > span {
+  transform: translateX(18px);
+}
+
+.bright {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.bright span {
+  flex: none;
+}
+
+.bright input {
+  flex: 1;
+}
+
+.tints {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.tint {
+  aspect-ratio: 1;
+  max-width: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-s);
+}
+
+.tint[aria-pressed='true'] {
+  border-color: var(--teal);
+}
+
+@media (max-width: 900px) {
+  .wrap {
+    width: 100%;
+  }
+}
