@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CarveStudio } from '@/features/studio/CarveStudio';
+import { CreateRoomButton } from '@/features/landing/CreateRoomButton';
 import { InventoryRail } from '@/features/inventory/InventoryRail';
 import { ObjectBar } from '@/features/room/ObjectBar';
 import { RoomSettingsPanel } from '@/features/room/RoomSettingsPanel';
@@ -280,9 +281,11 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
       ) : null}
 
       {ownerResolved && shared && !canEdit ? (
-        <p className={`${styles.layer} ${styles.readOnly}`}>
-          다른 사람의 방을 보고 있습니다. 구경만 할 수 있어요.
-        </p>
+        <div className={`${styles.layer} ${styles.visitor}`}>
+          <p className={styles.visitorNote}>다른 사람의 방을 구경하고 있어요.</p>
+          <p className={styles.visitorCta}>내 사진으로 나만의 방도 만들어 보세요.</p>
+          <CreateRoomButton />
+        </div>
       ) : null}
 
       {controller.activeCharacterKey ? (
