@@ -6,6 +6,7 @@ MSG_FILE="$1"
 
 perl -e '
 use strict; use warnings; use utf8;
+binmode(STDERR, ":encoding(UTF-8)");
 open(my $fh, "<:encoding(UTF-8)", $ARGV[0]) or exit 0;
 my @lines = <$fh>; close $fh;
 @lines = grep { $_ !~ /^\s*#/ } @lines;
