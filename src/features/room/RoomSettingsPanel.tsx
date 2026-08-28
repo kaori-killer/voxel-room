@@ -16,6 +16,7 @@ export type RoomSettingsPanelProps = {
   onChange: (patch: Partial<RoomSettingsType>) => void;
   onResetView: () => void;
   onCopied: () => void;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const SIZE_LABEL_MAP: Record<number, string> = { 10: '작게', 12: '보통', 16: '넓게' };
@@ -29,8 +30,17 @@ export function RoomSettingsPanel({
   onResetView,
   onCopied,
   onCopyFailed,
+  onOpenChange,
 }: RoomSettingsPanelProps) {
   const [open, setOpen] = useState(false);
+
+  const toggleOpen = (): void => {
+    setOpen((value) => {
+      const next = !value;
+      onOpenChange?.(next);
+      return next;
+    });
+  };
 
   const handleCopyLink = async (): Promise<void> => {
     const url = buildRoomUrl(roomId, window.location.origin);
@@ -44,7 +54,7 @@ export function RoomSettingsPanel({
 
   return (
     <>
-      <button type="button" className="chip-btn" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="chip-btn" aria-expanded={open} onClick={toggleOpen}>
         방 꾸미기
       </button>
       {open ? (
