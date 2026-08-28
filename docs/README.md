@@ -7,6 +7,7 @@
 | --- | --- |
 | [conventions/code.md](conventions/code.md) | 타입·폴더 구조·React·마크업·품질·테스트 |
 | [conventions/naming.md](conventions/naming.md) | 타입 접미사, 훅, 헬퍼, 파일·변수 이름 |
+| [conventions/database.md](conventions/database.md) | Supabase 테이블·컬럼·인덱스·RLS 명명과 스키마 변경 규칙 |
 | [conventions/commit.md](conventions/commit.md) | 커밋 메시지 형식 (commitlint 로 강제) |
 | [conventions/review-checklist.md](conventions/review-checklist.md) | 코드 검수 8축 체크리스트 |
 | [conventions/glossary.md](conventions/glossary.md) | 용어 |
