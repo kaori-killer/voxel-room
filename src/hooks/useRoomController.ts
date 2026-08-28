@@ -211,6 +211,12 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // canEdit 은 소유 키(ownerKey)가 async 로 풀린 뒤에야 true 가 되므로,
+  // 마운트 시 한 번 잡은 readOnly 를 canEdit 이 바뀔 때마다 씬에 다시 반영한다.
+  useEffect(() => {
+    sceneRef.current?.setReadOnly(!canEdit);
+  }, [canEdit]);
+
   useEffect(() => {
     if (!musicPlayer) return undefined;
     return musicPlayer.subscribe(setPlayer);
