@@ -22,19 +22,24 @@ import { clamp } from '@/lib/math';
 import styles from './landing.module.css';
 
 /**
- * 랜딩 배경에 조작 불가한 복셀 캐릭터 몇 마리가 잔디밭을 자동으로 돌아다니는 장식 씬.
+ * 랜딩 배경에 조작 불가한 복셀 캐릭터 몇 마리가 텔레토비 동산을 자동으로 돌아다니는 장식 씬.
  * 방 엔진(RoomScene)은 재사용하지 않고, 순수 함수인 stepCharacter 와 buildVoxelMesh 만 빌려
  * 가벼운 독립 캔버스로 그린다. 그림자·후처리 없음, DPR·프레임 상한, 화면 밖이면 정지.
  */
 
-// 동물의 숲 톤 파스텔 — [몸통, 머리(밝게), 눈] 순.
-const PALETTES: ReadonlyArray<readonly [string, string, string]> = [
-  ['#8fd6b4', '#a9e3c6', '#3a4a44'],
-  ['#f4b8a0', '#f8cbb8', '#5a3f38'],
-  ['#9cc7f0', '#b6d7f5', '#37485c'],
-  ['#f2d99a', '#f7e6b8', '#5c4f30'],
-  ['#c3b1e8', '#d3c6ef', '#453a5c'],
-  ['#f2a0a8', '#f6bcc1', '#5c3a3f'],
+// 텔레토비 4인방 — [몸통, 머리(밝게), 눈] + 머리 위 안테나(캐릭터마다 모양 다름).
+const ANTENNA_HEX = '#3a3340';
+
+type TubbyType = {
+  palette: readonly [string, string, string];
+  antenna: readonly (readonly [number, number])[];
+};
+
+const TELETUBBIES: readonly TubbyType[] = [
+  { palette: ['#7b4ea8', '#9269c0', '#2b2140'], antenna: [[0, 5], [-1, 6], [1, 6]] }, // 팅키윙키(보라) · 삼각 뿔
+  { palette: ['#54bd34', '#72d154', '#203015'], antenna: [[0, 5], [0, 6], [0, 7]] }, // 딥시(초록) · 곧은 막대
+  { palette: ['#f2cd33', '#f7dc62', '#5a4a12'], antenna: [[0, 5], [1, 6], [1, 7]] }, // 라라(노랑) · 한쪽으로 말린
+  { palette: ['#df423b', '#ed6960', '#4a1c1a'], antenna: [[0, 5], [0, 6]] }, // 뽀(빨강) · 짧은 더듬이
 ];
 
 const AREA_X = 6.6;
@@ -50,11 +55,12 @@ function hexToRgb(hex: string): [number, number, number] {
  * 3×5×2 격자의 작고 둥근 복셀 캐릭터를 손으로 쌓는다.
  * 발은 y=0, 정면(눈)은 +Z 라 카메라를 바라본다.
  */
-function buildCharacterData(palette: readonly [string, string, string]): VoxelDataType {
-  const [bodyHex, headHex, eyeHex] = palette;
+function buildCharacterData(tubby: TubbyType): VoxelDataType {
+  const [bodyHex, headHex, eyeHex] = tubby.palette;
   const body = hexToRgb(bodyHex);
   const head = hexToRgb(headHex);
   const eye = hexToRgb(eyeHex);
+  const antenna = hexToRgb(ANTENNA_HEX);
 
   const positions: number[] = [];
   const colors: number[] = [];
@@ -76,9 +82,73 @@ function buildCharacterData(palette: readonly [string, string, string]): VoxelDa
     }
   }
 
+  // 머리 위 안테나 — 앞뒤 두 겹으로 세워 옆에서 봐도 얇지 않게.
+  for (const [ax, ay] of tubby.antenna) {
+    add(ax, ay, 0, antenna);
+    add(ax, ay, 1, antenna);
+  }
+
   const count = colors.length / 4;
   return {
     gridWidth: 3,
+    gridHeight: 5,
+    depthExtent: 2,
+    count,
+    positions: new Float32Array(positions),
+    colors: new Float32Array(colors),
+    maskPng: '',
+  };
+}
+
+/**
+ * 이상하게 생긴 보노보노 — 통통하고 둥근 해달. 넓적한 머리에 크고 멍한 눈 두 개,
+ * 머리 위엔 나뭇잎 하나. 텔레토비 사이에 한 마리 섞여 돌아다닌다.
+ */
+function buildBonobonoData(): VoxelDataType {
+  const body = hexToRgb('#a9bfc7');
+  const belly = hexToRgb('#e9eff1');
+  const head = hexToRgb('#c3d3d9');
+  const eye = hexToRgb('#20242b');
+  const nose = hexToRgb('#5b4636');
+  const leaf = hexToRgb('#78c05a');
+
+  const positions: number[] = [];
+  const colors: number[] = [];
+  const add = (x: number, y: number, z: number, rgb: [number, number, number]) => {
+    positions.push(x, y, z - 0.5);
+    colors.push(rgb[0], rgb[1], rgb[2], 1);
+  };
+
+  // 몸통(y0~1): 좁고 통통. 정면 가운데는 하얀 배.
+  for (let y = 0; y <= 1; y += 1) {
+    for (let x = -1; x <= 1; x += 1) {
+      for (let z = 0; z <= 1; z += 1) {
+        add(x, y, z, z === 1 && x === 0 ? belly : body);
+      }
+    }
+  }
+
+  // 머리(y2~4): 넓고 둥글게. 모서리를 깎고, 눈·코 자리는 비워 둔다.
+  for (let y = 2; y <= 4; y += 1) {
+    for (let x = -2; x <= 2; x += 1) {
+      for (let z = 0; z <= 1; z += 1) {
+        if ((y === 4 || y === 2) && Math.abs(x) === 2) continue; // 위·아래 옆모서리 둥글리기
+        if (y === 3 && z === 1 && Math.abs(x) === 1) continue; // 큰 눈 자리
+        if (y === 2 && z === 1 && x === 0) continue; // 코 자리
+        add(x, y, z, head);
+      }
+    }
+  }
+
+  add(-1, 3, 1, eye); // 넓게 벌어진 큰 눈 두 개
+  add(1, 3, 1, eye);
+  add(0, 2, 1, nose);
+  add(0, 5, 0, leaf); // 머리 위 나뭇잎
+  add(0, 5, 1, leaf);
+
+  const count = colors.length / 4;
+  return {
+    gridWidth: 5,
     gridHeight: 5,
     depthExtent: 2,
     count,
@@ -143,7 +213,9 @@ export function VoxelParade() {
 
     const walkers: Walker[] = [];
     for (let i = 0; i < count; i += 1) {
-      const data = buildCharacterData(PALETTES[i % PALETTES.length]!);
+      // 마지막 한 마리는 이상하게 생긴 보노보노, 나머지는 텔레토비 4인방.
+      const isBonobono = i === count - 1;
+      const data = isBonobono ? buildBonobonoData() : buildCharacterData(TELETUBBIES[i % TELETUBBIES.length]!);
       const mesh = buildVoxelMesh(data, false);
       const inner = new Group();
       const scale = CHAR_HEIGHT / data.gridHeight;
