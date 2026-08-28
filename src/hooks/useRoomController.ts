@@ -8,6 +8,7 @@ import type { InteractHintType } from '@/engine/roomScene';
 import { defaultObjectHeight, findFreeSpot } from '@/engine/placement';
 import { MusicPlayer } from '@/audio/musicPlayer';
 import type { PlayerSnapshotType } from '@/audio/musicPlayer';
+import { trackSrc } from '@/api/roomsClient';
 import {
   DEFAULT_CARVE_DEPTH,
   DEFAULT_CARVE_MODE,
@@ -33,6 +34,8 @@ const SAVE_DEBOUNCE_MS = 700;
 const MOBILE_BREAKPOINT = 900;
 
 export type UseRoomControllerParams = {
+  roomId: string;
+  shared: boolean;
   initialRoom: RoomType;
   canEdit: boolean;
   onPersist: (room: RoomType, thumbnail: string | null) => void;
@@ -79,7 +82,7 @@ export type RoomControllerType = {
 };
 
 export function useRoomController(params: UseRoomControllerParams): RoomControllerType {
-  const { initialRoom, canEdit, onPersist } = params;
+  const { roomId, shared, initialRoom, canEdit, onPersist } = params;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sceneRef = useRef<RoomScene | null>(null);
   const voxelCacheRef = useRef(new Map<string, VoxelDataType>());
@@ -221,6 +224,12 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
     if (!musicPlayer) return undefined;
     return musicPlayer.subscribe(setPlayer);
   }, [musicPlayer]);
+
+  // 공유 방에서는 로컬에 없는 곡을 서버에서 받아 재생한다 (직접 만든 방이 아니어도 음악이 나오도록).
+  useEffect(() => {
+    if (!musicPlayer) return;
+    musicPlayer.remoteUrlFor = shared ? (trackId) => trackSrc(roomId, trackId) : null;
+  }, [musicPlayer, shared, roomId]);
 
   useEffect(() => {
     sceneRef.current?.setMusicState(player.itemId, player.playing);

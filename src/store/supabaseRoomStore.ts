@@ -4,7 +4,7 @@ import type { RoomMetaType } from '@/domain/types';
 import { RoomForbiddenError, RoomNotFoundError } from './roomStore';
 import type { CreateRoomInputType, RoomStoreType, SaveRoomInputType, StoredRoomType } from './roomStore';
 
-type SupabaseConfigType = {
+export type SupabaseConfigType = {
   url: string;
   serviceKey: string;
 };
@@ -30,6 +30,33 @@ export function readSupabaseConfig(): SupabaseConfigType | null {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
   if (!url || !serviceKey) return null;
   return { url: url.replace(/\/$/, ''), serviceKey };
+}
+
+/**
+ * 방 소유 여부만 확인한다 (음악 업로드·삭제 인가용).
+ * save() 와 같은 해시 비교 규칙을 쓰되, 방 데이터는 읽지 않아 가볍다.
+ */
+export async function verifyRoomOwner(
+  config: SupabaseConfigType,
+  roomId: string,
+  ownerKeyHash: string,
+): Promise<'ok' | 'notfound' | 'forbidden'> {
+  const response = await fetch(
+    `${config.url}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(roomId)}&select=owner_key_hash&limit=1`,
+    {
+      headers: {
+        apikey: config.serviceKey,
+        Authorization: `Bearer ${config.serviceKey}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    },
+  );
+  if (!response.ok) throw new Error(`Supabase ${response.status}: ${await response.text()}`);
+  const rows = (await response.json()) as Pick<RoomRowType, 'owner_key_hash'>[];
+  const row = rows[0];
+  if (!row) return 'notfound';
+  return row.owner_key_hash === ownerKeyHash ? 'ok' : 'forbidden';
 }
 
 /**

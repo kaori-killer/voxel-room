@@ -72,6 +72,8 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
   );
 
   const controller = useRoomController({
+    roomId: meta.id,
+    shared,
     initialRoom,
     canEdit,
     onPersist: (room, thumbnail) => void handlePersist(room, thumbnail),
@@ -336,6 +338,9 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
           item={panelItem}
           player={player}
           musicPlayer={musicPlayer}
+          roomId={meta.id}
+          shared={shared}
+          ownerKey={ownerKey}
           onSetTracks={(tracks) => controller.handleSetTracks(panelItem.id, tracks)}
           onToast={setToast}
           onClose={() => setOpenPanel(null)}
