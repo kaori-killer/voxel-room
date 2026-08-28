@@ -7,14 +7,28 @@ import styles from './objectBar.module.css';
 export type ObjectBarProps = {
   name: string;
   height: number;
+  hasPhoto: boolean;
   onRotate: (direction: number) => void;
   onResize: (height: number) => void;
+  onAddPhoto: () => void;
+  onRemovePhoto: () => void;
   onDuplicate: () => void;
   onRemove: () => void;
   onDone: () => void;
 };
 
-export function ObjectBar({ name, height, onRotate, onResize, onDuplicate, onRemove, onDone }: ObjectBarProps) {
+export function ObjectBar({
+  name,
+  height,
+  hasPhoto,
+  onRotate,
+  onResize,
+  onAddPhoto,
+  onRemovePhoto,
+  onDuplicate,
+  onRemove,
+  onDone,
+}: ObjectBarProps) {
   return (
     <div className={styles.bar} role="toolbar" aria-label={`${name} 조작`}>
       <span className={styles.name}>{name}</span>
@@ -38,6 +52,15 @@ export function ObjectBar({ name, height, onRotate, onResize, onDuplicate, onRem
         />
         <output htmlFor="object-size">{formatTiles(height)}</output>
       </span>
+      <span className={styles.divider} aria-hidden="true" />
+      <button type="button" onClick={onAddPhoto}>
+        {hasPhoto ? '사진 바꾸기' : '사진'}
+      </button>
+      {hasPhoto ? (
+        <button type="button" onClick={onRemovePhoto}>
+          사진 빼기
+        </button>
+      ) : null}
       <span className={styles.divider} aria-hidden="true" />
       <button type="button" onClick={onDuplicate}>
         복제

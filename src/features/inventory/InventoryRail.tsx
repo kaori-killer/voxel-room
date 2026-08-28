@@ -49,13 +49,14 @@ export function InventoryRail({ items, thumbnails, canEdit, onTakeOut, onDelete 
               )}
               <span className={styles.name}>{item.name}</span>
             </button>
-            {traits.length ? (
+            {traits.length || item.photo ? (
               <span className={styles.badges}>
                 {traits.map((trait) => (
                   <span key={trait} className={`${styles.badge} ${BADGE_CLASS_MAP[trait] ?? ''}`}>
                     {TRAIT_LABEL_MAP[trait]}
                   </span>
                 ))}
+                {item.photo ? <span className={`${styles.badge} ${styles.badgePhoto}`}>사진</span> : null}
               </span>
             ) : null}
             {canEdit ? (

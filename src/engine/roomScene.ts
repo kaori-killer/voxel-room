@@ -58,8 +58,9 @@ import { createCharacterState, stepCharacter } from './character';
 import type { CharacterStateType, MoveInputType } from './character';
 import { buildRoomMeshes } from './roomBuilder';
 import type { RoomMeshesType } from './roomBuilder';
-import { buildVoxelMesh, disposeMesh, getGlowTexture } from './meshFactory';
-import type { VoxelMeshType } from './meshFactory';
+import { buildPhotoMesh, buildVoxelMesh, disposeMesh, disposePhotoMesh, getGlowTexture } from './meshFactory';
+import type { PhotoMeshType, VoxelMeshType } from './meshFactory';
+import { loadImageFromSource } from '@/lib/image';
 
 export type InteractHintType = {
   key: string;
@@ -94,6 +95,8 @@ type SceneObjectType = {
   lamp: LampStateType;
   lampLight: PointLight | null;
   lampGlow: Sprite | null;
+  photo: PhotoMeshType | null;
+  photoUrl: string | null;
   character: CharacterStateType | null;
   musicPulse: number;
   musicPhase: number;
@@ -308,7 +311,12 @@ export class RoomScene {
 
   /* -------------------------------------------------------------- 개체 */
 
-  addObject(placed: PlacedObjectType, data: VoxelDataType, traits: TraitSetType): void {
+  addObject(
+    placed: PlacedObjectType,
+    data: VoxelDataType,
+    traits: TraitSetType,
+    photo: string | null = null,
+  ): void {
     const group = new Group();
     const inner = new Group();
     const mesh = buildVoxelMesh(data, true);
@@ -331,6 +339,8 @@ export class RoomScene {
       lamp: placed.lamp ?? { on: true, bright: DEFAULT_LAMP_BRIGHT, tint: DEFAULT_LAMP_TINT },
       lampLight: null,
       lampGlow: null,
+      photo: null,
+      photoUrl: null,
       character: null,
       musicPulse: 0,
       musicPhase: Math.random() * Math.PI * 2,
@@ -339,6 +349,7 @@ export class RoomScene {
     this.objects.push(object);
     this.applyTransform(object);
     this.applyTraits(object, traits);
+    this.applyPhoto(object, photo);
   }
 
   removeObject(key: string, silent = false): void {
@@ -347,6 +358,7 @@ export class RoomScene {
     const object = this.objects[index];
     if (!object) return;
     this.detachLamp(object);
+    this.detachPhoto(object);
     this.scene.remove(object.group);
     disposeMesh(object.mesh);
     this.objects.splice(index, 1);
@@ -357,6 +369,11 @@ export class RoomScene {
 
   setTraits(itemId: string, traits: TraitSetType): void {
     this.objects.filter((o) => o.itemId === itemId).forEach((o) => this.applyTraits(o, traits));
+    this.events.onRoomChange();
+  }
+
+  setPhoto(itemId: string, photo: string | null): void {
+    this.objects.filter((o) => o.itemId === itemId).forEach((o) => this.applyPhoto(o, photo));
     this.events.onRoomChange();
   }
 
@@ -596,6 +613,32 @@ export class RoomScene {
 
     this.scratchColor.setHex(tint.hex, SRGBColorSpace).multiplyScalar(on * Math.min(0.34, 0.14 + bright * 0.1));
     object.mesh.material.emissive.copy(this.scratchColor);
+  }
+
+  /* -------------------------------------------------------------- 사진 */
+
+  private applyPhoto(object: SceneObjectType, photo: string | null): void {
+    const url = photo && photo.length ? photo : null;
+    if (object.photoUrl === url && (url === null || object.photo)) return;
+    object.photoUrl = url;
+    this.detachPhoto(object);
+    if (!url) return;
+    void loadImageFromSource(url)
+      .then((image) => {
+        // 로딩 사이에 치워지거나 사진이 또 바뀌었으면 버린다.
+        if (this.disposed || object.photoUrl !== url || !this.objects.includes(object)) return;
+        const mesh = buildPhotoMesh(image, object.data);
+        object.photo = mesh;
+        object.inner.add(mesh);
+      })
+      .catch(() => {});
+  }
+
+  private detachPhoto(object: SceneObjectType): void {
+    if (!object.photo) return;
+    object.inner.remove(object.photo);
+    disposePhotoMesh(object.photo);
+    object.photo = null;
   }
 
   /* -------------------------------------------------------------- 음악 */

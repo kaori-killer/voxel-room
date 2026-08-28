@@ -16,6 +16,11 @@ const maskPngSchema = z
   .max(400_000)
   .refine((v) => v.startsWith('data:image/png;base64,'), { message: 'PNG data URL 이어야 합니다' });
 
+const photoSchema = z
+  .string()
+  .max(900_000)
+  .refine((v) => v.startsWith('data:image/'), { message: '이미지 data URL 이어야 합니다' });
+
 export const traitSetSchema = z.object(
   Object.fromEntries(TRAIT_KEYS.map((k) => [k, z.boolean().optional()])) as Record<
     (typeof TRAIT_KEYS)[number],
@@ -38,6 +43,7 @@ export const inventoryItemSchema = z.object({
   }),
   traits: traitSetSchema.default({}),
   tracks: z.array(trackItemSchema).max(200).default([]),
+  photo: photoSchema.optional(),
 });
 
 export const lampStateSchema = z.object({

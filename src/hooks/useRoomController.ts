@@ -74,6 +74,7 @@ export type RoomControllerType = {
   handleJump: () => void;
   handleToggleSit: () => void;
   handleSetTracks: (itemId: string, tracks: InventoryItemType['tracks']) => void;
+  handleSetPhoto: (itemId: string, photo: string | null) => void;
   setBottomInset: (value: number) => void;
 };
 
@@ -109,6 +110,10 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
 
   const getTraits = useCallback((itemId: string): TraitSetType => {
     return itemsRef.current.find((item) => item.id === itemId)?.traits ?? {};
+  }, []);
+
+  const getPhoto = useCallback((itemId: string): string | null => {
+    return itemsRef.current.find((item) => item.id === itemId)?.photo ?? null;
   }, []);
 
   const schedulePersist = useCallback(() => {
@@ -189,7 +194,7 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
       for (const placed of initialRoom.placed) {
         const data = voxelCacheRef.current.get(placed.itemId);
         if (!data) continue;
-        scene.addObject(placed, data, getTraits(placed.itemId));
+        scene.addObject(placed, data, getTraits(placed.itemId), getPhoto(placed.itemId));
       }
       setThumbnails(nextThumbs);
       setReady(true);
@@ -257,13 +262,13 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
         height: defaultObjectHeight(data.gridWidth, data.gridHeight),
         lamp: { on: true, bright: DEFAULT_LAMP_BRIGHT, tint: DEFAULT_LAMP_TINT },
       };
-      scene.addObject(placed, data, getTraits(itemId));
+      scene.addObject(placed, data, getTraits(itemId), getPhoto(itemId));
       scene.placeAt(placed.key, spot.x, spot.z);
       scene.select(placed.key);
       setSelection(scene.getSelectedInfo());
       schedulePersist();
     },
-    [getTraits, schedulePersist],
+    [getPhoto, getTraits, schedulePersist],
   );
 
   const handleDeleteItem = useCallback(
@@ -298,12 +303,12 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
     if (!scene || !copy) return;
     const data = voxelCacheRef.current.get(copy.itemId);
     if (!data) return;
-    scene.addObject(copy, data, getTraits(copy.itemId));
+    scene.addObject(copy, data, getTraits(copy.itemId), getPhoto(copy.itemId));
     scene.placeAt(copy.key, copy.x, copy.z);
     scene.select(copy.key);
     setSelection(scene.getSelectedInfo());
     schedulePersist();
-  }, [getTraits, schedulePersist]);
+  }, [getPhoto, getTraits, schedulePersist]);
 
   const handleRotateSelected = useCallback((direction: number) => {
     sceneRef.current?.rotateSelected(direction);
@@ -337,6 +342,21 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
       setItems((prev) => {
         const next = prev.map((item) => (item.id === itemId ? { ...item, tracks } : item));
         itemsRef.current = next;
+        return next;
+      });
+      schedulePersist();
+    },
+    [schedulePersist],
+  );
+
+  const handleSetPhoto = useCallback(
+    (itemId: string, photo: string | null) => {
+      setItems((prev) => {
+        const next = prev.map((item) =>
+          item.id === itemId ? { ...item, photo: photo ?? undefined } : item,
+        );
+        itemsRef.current = next;
+        sceneRef.current?.setPhoto(itemId, photo);
         return next;
       });
       schedulePersist();
@@ -414,6 +434,7 @@ export function useRoomController(params: UseRoomControllerParams): RoomControll
     handleJump,
     handleToggleSit,
     handleSetTracks,
+    handleSetPhoto,
     setBottomInset,
   };
 }
