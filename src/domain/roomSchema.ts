@@ -10,6 +10,7 @@ import {
 } from './constants';
 import { DEPTH_MODES, LAMP_TINTS, ROOM_PALETTES, TRAIT_KEYS } from './types';
 import type { RoomType } from './types';
+import { DEFAULT_ITEMS, DEFAULT_PLACED } from './defaultObjects';
 
 const maskPngSchema = z
   .string()
@@ -144,4 +145,18 @@ function dropOrphanPlacements(room: RoomType): RoomType {
 
 export function emptyRoom(): RoomType {
   return { version: ROOM_VERSION, settings: { ...DEFAULT_ROOM_SETTINGS }, items: [], placed: [] };
+}
+
+/**
+ * 새로 만든 방의 초기 상태. 빈 방 대신 기본 오브제를 미리 놓아 준다.
+ * emptyRoom 과 분리해 둔다 — emptyRoom 은 손상된 방의 복구 기본값이라,
+ * 그쪽에 기본 오브제를 넣으면 남의 망가진 방에 엉뚱하게 되살아난다.
+ */
+export function seededRoom(): RoomType {
+  return {
+    version: ROOM_VERSION,
+    settings: { ...DEFAULT_ROOM_SETTINGS },
+    items: DEFAULT_ITEMS.map((it) => ({ ...it })),
+    placed: DEFAULT_PLACED.map((p) => ({ ...p })),
+  };
 }
