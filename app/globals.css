@@ -25,9 +25,9 @@
   --r-s: 8px;
   --r-m: 14px;
   --r-l: 20px;
-  --f-body: 'IBM Plex Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
-  --f-display: 'Jua', 'IBM Plex Sans KR', system-ui, sans-serif;
-  --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --f-body: var(--font-body), system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  --f-display: var(--font-display), var(--font-body), system-ui, sans-serif;
+  --f-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
 @media (prefers-color-scheme: dark) {

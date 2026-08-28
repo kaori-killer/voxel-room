@@ -1,15 +1,32 @@
 import type { Metadata, Viewport } from 'next';
+import { IBM_Plex_Mono, IBM_Plex_Sans_KR, Jua } from 'next/font/google';
 import { GoogleAnalytics } from '@/features/analytics/GoogleAnalytics';
 import { getSiteOrigin } from '@/lib/url';
 import './globals.css';
 
 /**
- * next/font 는 빌드 시점에 Google Fonts 를 받아 온다. 네트워크가 막힌 곳에서는
- * 빌드 자체가 실패하므로, 어디서든 빌드되도록 스타일시트로 받는다.
- * 폰트를 자체 호스팅하게 되면 next/font/local 로 바꾼다.
+ * next/font 가 빌드 시점에 폰트를 받아 같은 도메인(/_next)에서 자체 호스팅한다.
+ * 외부 CDN(fonts.googleapis.com) 연결 비용과 렌더 차단 stylesheet 를 없애고,
+ * display: swap 으로 폰트 로드가 첫 렌더를 막지 않게 한다. (빌드 시 네트워크 필요)
  */
-const FONT_HREF =
-  'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Jua&display=swap';
+const bodyFont = IBM_Plex_Sans_KR({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap',
+});
+const monoFont = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+const displayFont = Jua({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-display',
+  display: 'swap',
+});
 
 const TITLE = '복셀 공방 — 사진으로 만드는 내 방';
 const DESCRIPTION =
@@ -45,12 +62,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href={FONT_HREF} />
-      </head>
+    <html
+      lang="ko"
+      className={`${bodyFont.variable} ${monoFont.variable} ${displayFont.variable}`}
+    >
       <body>
         {children}
         <GoogleAnalytics />
