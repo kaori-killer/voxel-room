@@ -15,6 +15,7 @@ import { Toast } from '@/features/shared/Toast';
 import { useRoomController } from '@/hooks/useRoomController';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useRoomKeyboard } from '@/hooks/useRoomKeyboard';
+import { checkImageFile, fileToPhotoDataUrl } from '@/lib/image';
 import { saveRoom } from '@/api/roomsClient';
 import type { LampStateType, RoomMetaType, RoomType, TraitKeyType } from '@/domain/types';
 import { hashOwnerKey, readOwnerKey } from '@/store/ownerKey';
@@ -39,6 +40,7 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
   const [lampState, setLampState] = useState<LampStateType | null>(null);
   const [touch, setTouch] = useState(false);
   const railRef = useRef<HTMLElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setOwnerKey(readOwnerKey(meta.id));
@@ -139,6 +141,31 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
     setPendingDelete(null);
   }, [controller, pendingDelete]);
 
+  const handlePickPhoto = useCallback(() => {
+    const input = photoInputRef.current;
+    if (!input) return;
+    input.value = '';
+    input.click();
+  }, []);
+
+  const handlePhotoFile = useCallback(
+    async (file: File | null | undefined) => {
+      const itemId = selection?.itemId;
+      if (!itemId) return;
+      const checked = checkImageFile(file);
+      if (!checked.ok) {
+        setToast(checked.message);
+        return;
+      }
+      try {
+        controller.handleSetPhoto(itemId, await fileToPhotoDataUrl(checked.file));
+      } catch {
+        setToast('사진을 넣지 못했습니다. 다른 이미지를 골라 주세요.');
+      }
+    },
+    [controller, selection],
+  );
+
   const handleToggleTrait = useCallback(
     (trait: TraitKeyType, on: boolean) => {
       if (selection) controller.handleToggleTrait(selection.itemId, trait, on);
@@ -221,8 +248,11 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
           <ObjectBar
             name={controller.selectedItem.name}
             height={selection.height}
+            hasPhoto={Boolean(controller.selectedItem.photo)}
             onRotate={controller.handleRotateSelected}
             onResize={controller.handleResizeSelected}
+            onAddPhoto={handlePickPhoto}
+            onRemovePhoto={() => controller.handleSetPhoto(selection.itemId, null)}
             onDuplicate={controller.handleDuplicateSelected}
             onRemove={controller.handleRemoveSelected}
             onDone={() => controller.handleSelect(null)}
@@ -263,12 +293,22 @@ export function RoomView({ meta, initialRoom, shared }: RoomViewProps) {
       ) : null}
 
       <p className={`${styles.layer} ${styles.hints}`}>
-        <b>끌기</b> 옮기기 · <b>빈 곳 끌기</b> 시점 돌리기
+        오브제를 <b>끌어</b> 옮기고, 빈 바닥을 <b>끌어</b> 시점을 돌립니다.
         <br />
-        <b>휠</b> 확대 · <kbd>R</kbd> 회전 · <kbd>Del</kbd> 치우기
+        <b>휠</b>로 확대·축소 · <kbd>R</kbd> 회전 · <kbd>Del</kbd> 치우기
       </p>
 
       {upload.input}
+
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(event) => void handlePhotoFile(event.target.files?.[0])}
+      />
 
       {upload.image ? (
         <CarveStudio

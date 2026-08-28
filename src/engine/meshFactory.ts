@@ -7,11 +7,15 @@ import {
   HemisphereLight,
   AmbientLight,
   InstancedMesh,
+  Mesh,
+  MeshBasicMaterial,
   MeshLambertMaterial,
   Object3D,
   OrthographicCamera,
+  PlaneGeometry,
   Scene,
   SRGBColorSpace,
+  Texture,
   WebGLRenderer,
 } from 'three';
 import type { VoxelDataType } from '@/domain/types';
@@ -52,6 +56,38 @@ export function buildVoxelMesh(data: VoxelDataType, castShadow: boolean): VoxelM
 
 export function disposeMesh(mesh: VoxelMeshType): void {
   mesh.dispose();
+  mesh.material.dispose();
+}
+
+export type PhotoMeshType = Mesh<PlaneGeometry, MeshBasicMaterial>;
+
+/** 오브제 정면(+Z)에 붙는 사진 판. 격자 단위로 만들어 inner 그룹 안에서 함께 스케일된다. */
+export function buildPhotoMesh(image: HTMLImageElement, data: VoxelDataType): PhotoMeshType {
+  const texture = new Texture(image);
+  texture.colorSpace = SRGBColorSpace;
+  texture.needsUpdate = true;
+
+  const aspect = image.width / Math.max(1, image.height);
+  const maxWidth = data.gridWidth * 0.82;
+  const maxHeight = data.gridHeight * 0.82;
+  let width = maxWidth;
+  let height = width / aspect;
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * aspect;
+  }
+
+  const material = new MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false });
+  const mesh: PhotoMeshType = new Mesh(new PlaneGeometry(width, height), material);
+  mesh.raycast = () => {};
+  mesh.renderOrder = 2;
+  mesh.position.set(0, data.gridHeight / 2, data.depthExtent / 2 + 0.3);
+  return mesh;
+}
+
+export function disposePhotoMesh(mesh: PhotoMeshType): void {
+  mesh.geometry.dispose();
+  mesh.material.map?.dispose();
   mesh.material.dispose();
 }
 

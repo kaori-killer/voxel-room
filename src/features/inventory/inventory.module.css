@@ -16,6 +16,7 @@
 .badgeMusic { background: var(--accent-soft); color: var(--accent); }
 .badgeLamp { background: var(--lamp-soft); color: var(--lamp); }
 .badgePiano { background: var(--surface); color: var(--ink-2); border: 1px solid var(--line); }
+.badgePhoto { background: var(--ink); color: var(--paper, #fff); }
 
 @media (max-width: 900px) {
   .list { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; gap: 8px; padding: 2px 2px 4px; }

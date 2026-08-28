@@ -9,7 +9,7 @@ function validRoom() {
   return {
     version: 1,
     settings: { size: 12, palette: 'wood' },
-    items: [{ id: 'i1', name: '버섯', maskPng: MASK, carve: { depth: 11, mode: 'inflate' }, traits: { lamp: true }, tracks: [] }],
+    items: [{ id: 'i1', name: '버섯', maskPng: MASK, carve: { depth: 11, mode: 'inflate' }, traits: { lamp: true }, tracks: [], photo: undefined as string | undefined }],
     placed: [{ key: 'p1', itemId: 'i1', x: 0, z: 0, y: 0, rot: 0, height: 2 }],
   };
 }
@@ -73,5 +73,26 @@ describe('saveRoomReqSchema', () => {
 
   it('소유 키 없이는 저장할 수 없다', () => {
     expect(saveRoomReqSchema.safeParse({ room: validRoom() }).success).toBe(false);
+  });
+
+  it('이미지가 아닌 사진을 거른다', () => {
+    const room = validRoom();
+    room.items[0]!.photo = 'javascript:alert(1)';
+    const result = saveRoomReqSchema.safeParse({ room, ownerKeyHash: buildOwnerKey() });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('오브제 사진', () => {
+  it('이미지 data URL 사진을 그대로 살린다', () => {
+    const room = validRoom();
+    room.items[0]!.photo = 'data:image/jpeg;base64,AAAA';
+    expect(parseRoom(room).items[0]!.photo).toBe('data:image/jpeg;base64,AAAA');
+  });
+
+  it('사진이 깨진 오브제는 통째로 버려 방을 지킨다', () => {
+    const room = validRoom();
+    room.items[0]!.photo = 'not-an-image';
+    expect(parseRoom(room).items).toHaveLength(0);
   });
 });

@@ -55,6 +55,8 @@ export type InventoryItemType = {
   carve: Pick<CarveOptionsType, 'depth' | 'mode'>;
   traits: TraitSetType;
   tracks: TrackItemType[];
+  /** 오브제 정면에 붙는 사진(이미지 data URL). 꺼낸 모든 개체가 공유한다. */
+  photo?: string;
 };
 
 export type LampStateType = {

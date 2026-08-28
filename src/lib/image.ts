@@ -36,6 +36,25 @@ export function loadImageFromFile(file: File): Promise<HTMLImageElement> {
   return loadImageFromSource(url).finally(() => URL.revokeObjectURL(url));
 }
 
+const PHOTO_MAX_SIZE = 720;
+
+/** 오브제 정면에 붙일 사진. 방 저장이 무거워지지 않게 긴 변을 줄이고 JPEG 로 굽는다. */
+export async function fileToPhotoDataUrl(file: File, maxSize = PHOTO_MAX_SIZE): Promise<string> {
+  const image = await loadImageFromFile(file);
+  const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('사진을 그리지 못했습니다');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image, 0, 0, width, height);
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+
 export function normalizeItemName(rawName: string, fallback: string): string {
   const trimmed = rawName.replace(/\.[a-z0-9]+$/i, '').trim().slice(0, 24);
   return trimmed || fallback;
