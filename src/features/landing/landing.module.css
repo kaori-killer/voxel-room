@@ -1,0 +1,14 @@
+.page { min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px calc(32px + env(safe-area-inset-bottom, 0px)); }
+.card { width: min(560px, 100%); display: flex; flex-direction: column; gap: 22px; text-align: center; }
+.brand { display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
+.cube { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--accent) 0 50%, var(--teal) 50% 100%); box-shadow: var(--shadow-s); }
+.title { font-size: clamp(28px, 7vw, 40px); line-height: 1.15; }
+.lead { color: var(--ink-2); font-size: 15.5px; line-height: 1.7; }
+.actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.actions .btn { width: min(280px, 100%); }
+.note { font-size: 12.5px; color: var(--muted); }
+.features { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); text-align: left; margin-top: 8px; }
+.feature { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-m); padding: 13px 15px; box-shadow: var(--shadow-s); }
+.feature dt { font-size: 13.5px; font-weight: 600; }
+.feature dd { margin: 3px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+.error { color: var(--danger); font-size: 13px; }

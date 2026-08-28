@@ -1,0 +1,31 @@
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--sheet, 0px) + 96px);
+  z-index: 95;
+  transform: translate(-50%, 12px);
+  padding: 10px 19px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 13.5px;
+  box-shadow: var(--shadow-l);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  max-width: min(90vw, 520px);
+  text-align: center;
+}
+.toast[data-open='true'] { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+
+.veil {
+  position: fixed; inset: 0; z-index: 96; display: grid; place-items: center;
+  background: rgba(12, 14, 24, 0.5); backdrop-filter: blur(2px);
+}
+.dialog {
+  width: min(360px, 88vw); padding: 22px 22px 18px; border-radius: var(--r-l);
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-l);
+}
+.dialog p { font-size: 14.5px; color: var(--ink-2); line-height: 1.6; }
+.dialogRow { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+.dialogRow :global(.btn) { padding: 9px 18px; font-size: 13.5px; }

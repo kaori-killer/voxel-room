@@ -1,0 +1,27 @@
+.list { flex: 1; overflow-y: auto; overflow-x: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: start; padding: 2px; }
+.empty { flex: 1; font-size: 13px; color: var(--muted); padding: 22px 10px; text-align: center; line-height: 1.6; border: 1px dashed var(--line); border-radius: var(--r-m); }
+.card { position: relative; }
+.take { width: 100%; border: 1px solid var(--line-soft); background: var(--surface-2); border-radius: var(--r-m); cursor: pointer; padding: 8px 6px 7px; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: border-color 0.12s ease, transform 0.12s ease; }
+.take:hover:enabled { border-color: var(--accent); transform: translateY(-2px); }
+.take:disabled { cursor: default; }
+.thumb { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }
+.thumbFallback { width: 100%; aspect-ratio: 1; display: block; border-radius: var(--r-s); background: var(--line-soft); }
+.name { font-size: 11.5px; color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.remove { position: absolute; right: -4px; top: -4px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 11px; line-height: 1; display: grid; place-items: center; opacity: 0; transition: opacity 0.12s ease; }
+.card:hover .remove, .remove:focus-visible { opacity: 1; }
+.remove:hover { color: var(--accent); border-color: var(--accent); }
+.badges { position: absolute; left: 5px; top: 5px; display: flex; gap: 3px; pointer-events: none; flex-wrap: wrap; max-width: calc(100% - 10px); }
+.badge { font-size: 9.5px; font-weight: 600; line-height: 1; padding: 3px 5px; border-radius: 5px; }
+.badgeCharacter { background: var(--teal-soft); color: var(--teal); }
+.badgeMusic { background: var(--accent-soft); color: var(--accent); }
+.badgeLamp { background: var(--lamp-soft); color: var(--lamp); }
+.badgePiano { background: var(--surface); color: var(--ink-2); border: 1px solid var(--line); }
+
+@media (max-width: 900px) {
+  .list { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; gap: 8px; padding: 2px 2px 4px; }
+  .card { flex: 0 0 84px; }
+  .take { padding: 6px 4px 5px; }
+  .name { font-size: 10.5px; }
+  .remove { opacity: 1; width: 19px; height: 19px; }
+  .empty { padding: 16px 10px; font-size: 12px; }
+}

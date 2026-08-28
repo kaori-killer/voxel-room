@@ -1,0 +1,15 @@
+.panel { width: 250px; padding: 16px; border-radius: var(--r-l); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-l); display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.segment { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 11px; }
+.segment button { border: 0; background: transparent; cursor: pointer; padding: 7px 4px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.segment button[aria-pressed='true'] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-s); }
+.palette { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.swatch { aspect-ratio: 1; border-radius: 10px; cursor: pointer; padding: 0; border: 2px solid transparent; box-shadow: var(--shadow-s); background-size: 100% 100%; }
+.swatch[aria-pressed='true'] { border-color: var(--teal); }
+.row { display: flex; gap: 6px; }
+.row :global(.btn) { flex: 1; padding: 9px 12px; font-size: 13px; border-radius: 10px; }
+.note { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+
+@media (max-width: 900px) {
+  .panel { width: min(280px, calc(100vw - 20px)); max-height: 70vh; overflow-y: auto; }
+}
