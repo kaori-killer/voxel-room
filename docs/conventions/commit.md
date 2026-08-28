@@ -2,8 +2,8 @@
 
 커밋 시점에 강제한다. 어기면 커밋 자체가 실패한다.
 
-이 저장소는 의존성이 없어서 commitlint 대신 `.githooks/commit-msg` 가 같은 규칙을 본다.
-클론한 뒤 한 번만 켜면 된다.
+`commitlint.config.mjs` 와 `.githooks/commit-msg` 가 같은 규칙을 본다.
+훅은 클론한 뒤 한 번만 켜면 된다.
 
 ```bash
 git config core.hooksPath .githooks
