@@ -156,28 +156,36 @@ export class PianoSynth {
     const now = context.currentTime;
     const frequency = noteFrequency(semitone, this.octave);
 
+    // 음이 높을수록 배음이 적고(맑고) 빨리 사그라드는 실제 피아노의 성질.
+    // 0(저음) ~ 1(고음) 로 정규화해 밝기·감쇠를 음 높이에 따라 절제한다.
+    const pitch = Math.min(1, Math.max(0, (frequency - 110) / 1200));
+    const decayTail = 3.4 - pitch * 2.0; // 고음일수록 짧은 여운 (3.4s → 1.4s)
+
     const gain = context.createGain();
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.9, now + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.04, now + 3.4);
+    gain.gain.exponentialRampToValueAtTime(0.9, now + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.28, now + 0.28);
+    gain.gain.exponentialRampToValueAtTime(0.04, now + decayTail);
 
     const filter = context.createBiquadFilter();
     filter.type = 'lowpass';
     filter.Q.value = 0.7;
-    filter.frequency.setValueAtTime(Math.min(11000, frequency * 11), now);
-    filter.frequency.exponentialRampToValueAtTime(Math.max(420, frequency * 3), now + 1.1);
+    // 저음은 배음을 넓게(밝게), 고음은 상대적으로 좁게 열어 거칠게 튀지 않게 한다.
+    filter.frequency.setValueAtTime(Math.min(10000, frequency * (12 - pitch * 8)), now);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(400, frequency * 2.6), now + 1.1);
 
     const carrier = context.createOscillator();
     carrier.type = 'sine';
     carrier.frequency.value = frequency;
 
+    // 변조기 1:1 → 1,2,3,4… 꽉 찬 배음(피아노에 가까움). 3:1 은 벨처럼 금속성이라 지양.
     const modulator = context.createOscillator();
     modulator.type = 'sine';
-    modulator.frequency.value = frequency * 3;
+    modulator.frequency.value = frequency;
+    // 어택 순간만 밝고, 곧 순한 배음으로 가라앉는다. 고음일수록 어택 밝기를 절제.
     const modulatorGain = context.createGain();
-    modulatorGain.gain.setValueAtTime(frequency * 2.4, now);
-    modulatorGain.gain.exponentialRampToValueAtTime(frequency * 0.04, now + 0.55);
+    modulatorGain.gain.setValueAtTime(frequency * (1.9 - pitch * 1.3), now);
+    modulatorGain.gain.exponentialRampToValueAtTime(frequency * 0.03, now + 0.5);
     modulator.connect(modulatorGain);
     modulatorGain.connect(carrier.frequency);
 
