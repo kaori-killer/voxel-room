@@ -4,6 +4,7 @@ import { emptyRoom, roomTitleSchema } from '@/domain/roomSchema';
 import { buildRoomId } from '@/lib/id';
 import { jsonError, jsonOk, readJsonBody } from '@/lib/http';
 import { logger } from '@/lib/logger';
+import { captureError } from '@/lib/monitoring';
 import { getRoomStore } from '@/store';
 
 export const runtime = 'nodejs';
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
     return jsonOk({ meta: stored.meta }, 201);
   } catch (error) {
     logger.error('방 생성 실패', error);
+    captureError(error, { route: 'POST /api/rooms' });
     return jsonError('방을 만들지 못했습니다', 500);
   }
 }

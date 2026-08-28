@@ -3,6 +3,7 @@ import { hashOwnerKey } from '@/store/ownerKey';
 import { isAdminRequest } from '@/lib/adminSession';
 import { jsonError, jsonOk, readJsonBody } from '@/lib/http';
 import { logger } from '@/lib/logger';
+import { captureError } from '@/lib/monitoring';
 import { getChatStore } from '@/store/chatStore';
 
 export const runtime = 'nodejs';
@@ -20,6 +21,7 @@ export async function GET(_request: Request, context: RouteContextType) {
     return jsonOk({ messages: await store.list(roomId), enabled: true });
   } catch (error) {
     logger.error('채팅 조회 실패', error);
+    captureError(error, { route: 'GET /api/rooms/:id/chat', roomId });
     return jsonError('대화를 불러오지 못했습니다', 500);
   }
 }
@@ -46,6 +48,7 @@ export async function POST(request: Request, context: RouteContextType) {
     return jsonOk({ message }, 201);
   } catch (error) {
     logger.error('채팅 전송 실패', error);
+    captureError(error, { route: 'POST /api/rooms/:id/chat', roomId });
     return jsonError('메시지를 남기지 못했습니다', 500);
   }
 }

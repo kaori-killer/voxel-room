@@ -1,5 +1,6 @@
 import { roomIdSchema } from '@/domain/roomSchema';
 import { logger } from '@/lib/logger';
+import { captureError } from '@/lib/monitoring';
 import { getRoomStore } from '@/store';
 
 export const runtime = 'nodejs';
@@ -25,6 +26,7 @@ export async function GET(_request: Request, context: RouteContextType) {
     });
   } catch (error) {
     logger.error('썸네일 조회 실패', error);
+    captureError(error, { route: 'GET /api/rooms/:id/thumbnail', roomId });
     return new Response('Not found', { status: 404 });
   }
 }

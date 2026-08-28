@@ -1,6 +1,7 @@
 import { parseRoom, roomIdSchema, saveRoomReqSchema } from '@/domain/roomSchema';
 import { jsonError, jsonOk, readJsonBody } from '@/lib/http';
 import { logger } from '@/lib/logger';
+import { captureError } from '@/lib/monitoring';
 import { getRoomStore, isSharingEnabled, RoomForbiddenError, RoomNotFoundError } from '@/store';
 
 export const runtime = 'nodejs';
@@ -18,6 +19,7 @@ export async function GET(_request: Request, context: RouteContextType) {
     return jsonOk({ meta: stored.meta, room: stored.room, shared: isSharingEnabled() });
   } catch (error) {
     logger.error('방 조회 실패', error);
+    captureError(error, { route: 'GET /api/rooms/:id', roomId });
     return jsonError('방을 불러오지 못했습니다', 500);
   }
 }
@@ -42,6 +44,7 @@ export async function PUT(request: Request, context: RouteContextType) {
     if (error instanceof RoomNotFoundError) return jsonError('방을 찾지 못했습니다', 404);
     if (error instanceof RoomForbiddenError) return jsonError('이 방을 고칠 권한이 없습니다', 403);
     logger.error('방 저장 실패', error);
+    captureError(error, { route: 'PUT /api/rooms/:id', roomId });
     return jsonError('방을 저장하지 못했습니다', 500);
   }
 }
