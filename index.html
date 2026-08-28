@@ -37,6 +37,8 @@
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
   --sky-1:#F3EDE1;
   --sky-2:#DED2BE;
+  --lamp:#B07A14;
+  --lamp-soft:#FAF0D2;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -56,6 +58,8 @@
     --shadow-s:0 1px 2px rgba(0,0,0,.5);
     --shadow-m:0 1px 2px rgba(0,0,0,.45), 0 14px 30px -16px rgba(0,0,0,.8);
     --shadow-l:0 2px 4px rgba(0,0,0,.5), 0 32px 64px -28px rgba(0,0,0,.9);
+    --lamp:#F5CC63;
+    --lamp-soft:#3B300F;
   }
 }
 :root[data-theme="dark"]{
@@ -75,6 +79,8 @@
   --shadow-s:0 1px 2px rgba(0,0,0,.5);
   --shadow-m:0 1px 2px rgba(0,0,0,.45), 0 14px 30px -16px rgba(0,0,0,.8);
   --shadow-l:0 2px 4px rgba(0,0,0,.5), 0 32px 64px -28px rgba(0,0,0,.9);
+  --lamp:#F5CC63;
+  --lamp-soft:#3B300F;
 }
 
 *{box-sizing:border-box}
@@ -138,15 +144,24 @@ button{font:inherit; color:inherit}
 .btn-block{width:100%}
 
 .rail-h{
-  display:flex; align-items:baseline; gap:8px; padding:0 2px;
+  display:flex; align-items:center; gap:7px; padding:2px 2px; width:100%;
+  border:0; background:transparent; cursor:pointer; text-align:left;
   font-size:12px; font-weight:600; letter-spacing:.1em;
   text-transform:uppercase; color:var(--muted); font-family:var(--f-mono);
 }
-.rail-h span{margin-left:auto; text-transform:none; letter-spacing:0; font-size:11.5px}
+.rail-h:hover{color:var(--ink-2)}
+.rail-h #inv-count{margin-left:auto; text-transform:none; letter-spacing:0; font-size:11.5px}
+.rail-caret{
+  display:inline-block; font-size:10px; line-height:1;
+  transition:transform .18s ease; transform-origin:center;
+}
+.rail-h[aria-expanded="false"] .rail-caret{transform:rotate(-90deg)}
+body.inv-collapsed #inv-list{display:none}
+body.inv-collapsed .rail{gap:10px}
 
 #inv-list{
-  flex:1; overflow-y:auto; overflow-x:hidden;
-  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+  display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px;
   align-content:start; padding:2px;
 }
 .inv-empty{
@@ -154,17 +169,18 @@ button{font:inherit; color:inherit}
   padding:22px 10px; text-align:center; line-height:1.6;
   border:1px dashed var(--line); border-radius:var(--r-m);
 }
-.inv-card{position:relative}
+.inv-card{position:relative; min-width:0}
 .inv-take{
-  width:100%; border:1px solid var(--line-soft); background:var(--surface-2);
+  width:100%; min-width:0; border:1px solid var(--line-soft); background:var(--surface-2);
   border-radius:var(--r-m); cursor:pointer; padding:8px 6px 7px;
-  display:flex; flex-direction:column; align-items:center; gap:2px;
+  display:flex; flex-direction:column; align-items:stretch; gap:4px;
   transition:border-color .12s ease, transform .12s ease;
 }
 .inv-take:hover{border-color:var(--accent); transform:translateY(-2px)}
-.inv-take img{width:100%; aspect-ratio:1; object-fit:contain; display:block}
+.inv-take img{width:100%; aspect-ratio:1; object-fit:contain; display:block; min-width:0}
 .inv-name{
-  font-size:11.5px; color:var(--ink-2); max-width:100%;
+  font-size:11.5px; color:var(--ink-2);
+  display:block; width:100%; min-width:0; text-align:center;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .inv-del{
@@ -185,6 +201,7 @@ button{font:inherit; color:inherit}
 }
 .badge-c{background:var(--teal-soft); color:var(--teal)}
 .badge-m{background:var(--accent-soft); color:var(--accent)}
+.badge-l{background:var(--lamp-soft); color:var(--lamp)}
 
 .rail-foot{display:flex; gap:6px}
 .rail-foot .btn{flex:1; padding:8px 6px; font-size:12.5px; font-weight:500; border-radius:10px}
@@ -261,6 +278,69 @@ body.panel-open .panel{display:flex}
 .trait b{display:block; font-size:14px; font-weight:600; color:var(--ink)}
 .trait small{display:block; font-size:12px; color:var(--muted); line-height:1.5}
 .pop-note{font-size:11.5px; color:var(--muted); line-height:1.5; border-top:1px solid var(--line-soft); padding-top:10px}
+
+/* 전등 */
+.lamp{
+  width:300px; padding:12px 14px 13px; border-radius:var(--r-l);
+  background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow-l);
+  display:flex; flex-direction:column; gap:11px;
+}
+.lamp[hidden]{display:none}
+.lamp-top{display:flex; align-items:center; gap:9px}
+.lamp-title{font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.lamp-state{margin-left:auto; font-size:11.5px; color:var(--muted); font-family:var(--f-mono)}
+.lamp-switch{
+  flex:none; width:46px; height:26px; border-radius:999px; cursor:pointer;
+  border:1px solid var(--line); background:var(--surface-2); padding:2px;
+  transition:background .16s ease, border-color .16s ease;
+}
+.lamp-switch span{
+  display:block; width:20px; height:20px; border-radius:50%;
+  background:var(--muted); transition:transform .16s ease, background .16s ease;
+}
+.lamp-switch[aria-checked="true"]{background:var(--lamp-soft); border-color:var(--lamp)}
+.lamp-switch[aria-checked="true"] span{transform:translateX(20px); background:var(--lamp)}
+.lamp-body{display:flex; flex-direction:column; gap:9px; transition:opacity .16s ease}
+.lamp-body.is-off{opacity:.4}
+.lamp-row{display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--muted)}
+.lamp-row label, .lamp-row > span{width:32px; flex:none}
+#lamp-bright{flex:1; width:auto}
+.tint{display:flex; gap:7px}
+.tint button{
+  width:24px; height:24px; border-radius:50%; cursor:pointer; padding:0;
+  border:2px solid transparent; box-shadow:var(--shadow-s);
+}
+.tint button[aria-pressed="true"]{border-color:var(--ink)}
+.tint button[data-tint="warm"]{background:#FFC069}
+.tint button[data-tint="white"]{background:#FFF4E2}
+.tint button[data-tint="pink"]{background:#FFA3C4}
+.tint button[data-tint="cool"]{background:#9FC8FF}
+
+/* 터치용 캐릭터 조작기 */
+.pad{left:20px; bottom:calc(var(--sheet, 0px) + 20px); touch-action:none}
+.pad[hidden], .padbtns[hidden]{display:none}
+.pad-ring{
+  width:118px; height:118px; border-radius:50%;
+  background:color-mix(in srgb, var(--surface) 72%, transparent);
+  border:1px solid var(--line); box-shadow:var(--shadow-m);
+  display:grid; place-items:center;
+}
+.pad-nub{
+  width:48px; height:48px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--line);
+  box-shadow:var(--shadow-m);
+  transition:transform .06s linear;
+}
+.padbtns{
+  right:20px; bottom:calc(var(--sheet, 0px) + 20px);
+  display:flex; flex-direction:column; gap:10px; touch-action:none;
+}
+.padbtns button{
+  width:76px; height:56px; border-radius:20px; cursor:pointer;
+  border:1px solid var(--line); background:var(--surface);
+  box-shadow:var(--shadow-m); font-size:14px; font-weight:600; color:var(--ink-2);
+}
+.padbtns button:active{background:var(--accent-soft); color:var(--accent); transform:scale(.96)}
 
 /* 플레이어 */
 .player{
@@ -348,10 +428,9 @@ body.panel-open .panel{display:flex}
 
 /* 재생 중 */
 .nowplaying{
-  left:50%; top:18px; transform:translateX(-50%);
-  display:flex; align-items:center; gap:10px; padding:6px 8px 6px 6px;
-  background:var(--surface); border:1px solid var(--line);
-  border-radius:999px; box-shadow:var(--shadow-l); max-width:min(360px, 60vw);
+  flex:none; display:flex; align-items:center; gap:9px; padding:6px 8px 6px 6px;
+  background:var(--surface-2); border:1px solid var(--line-soft);
+  border-radius:999px;
 }
 .nowplaying[hidden]{display:none}
 .nowplaying button{
@@ -364,6 +443,84 @@ body.panel-open .panel{display:flex}
 .np-txt{min-width:0; display:flex; flex-direction:column; line-height:1.25; padding-right:2px}
 .np-txt b{font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .np-txt small{font-size:10.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* 말풍선 */
+.bubble{
+  transform:translate(-50%,-100%);
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  padding:8px 12px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--line);
+  box-shadow:var(--shadow-l); font-size:13.5px; font-weight:600; color:var(--ink);
+  white-space:nowrap; animation:bub .18s cubic-bezier(.2,.8,.3,1);
+}
+.bubble[hidden]{display:none}
+.bubble::after{
+  content:''; position:absolute; left:50%; bottom:-6px; width:10px; height:10px;
+  transform:translateX(-50%) rotate(45deg);
+  background:var(--surface); border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.bubble kbd{font-size:10.5px}
+.bubble[hidden]{display:none}
+@keyframes bub{from{opacity:0; transform:translate(-50%,-90%)} to{opacity:1; transform:translate(-50%,-100%)}}
+.pianochip{box-shadow:var(--shadow-l)}
+.pianochip[hidden]{display:none}
+
+/* 피아노 */
+.piano{
+  position:fixed; left:0; right:0; bottom:0; z-index:70;
+  background:var(--surface); border-top:1px solid var(--line);
+  box-shadow:0 -12px 40px -20px rgba(0,0,0,.5);
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  display:flex; flex-direction:column; gap:10px;
+  animation:pianoUp .2s cubic-bezier(.2,.8,.3,1);
+}
+.piano[hidden]{display:none}
+@keyframes pianoUp{from{transform:translateY(40px); opacity:0} to{transform:none; opacity:1}}
+.piano-bar{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.piano-title{font-family:var(--f-display); font-size:16px; margin-right:4px}
+.piano-oct{
+  border:1px solid var(--line); background:var(--surface-2); cursor:pointer;
+  width:28px; height:28px; border-radius:8px; font-size:10px; color:var(--ink-2);
+}
+.piano-oct:disabled{opacity:.35; cursor:not-allowed}
+.piano-octv{font-family:var(--f-mono); font-size:11.5px; color:var(--muted); min-width:52px; text-align:center}
+.piano-ped, .piano-x{
+  border:1px solid var(--line); background:var(--surface-2); cursor:pointer;
+  padding:6px 12px; border-radius:999px; font-size:12.5px; color:var(--ink-2);
+  display:inline-flex; align-items:center; gap:6px;
+}
+.piano-ped{margin-left:auto; touch-action:none}
+.piano-ped.is-down{background:var(--teal-soft); color:var(--teal); border-color:transparent}
+.piano-x:hover{border-color:var(--muted)}
+.keys{
+  position:relative; height:132px; touch-action:none;
+  display:flex; gap:0; --wc:10;
+}
+.pk{
+  position:relative; border:0; cursor:pointer; padding:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  gap:2px; padding-bottom:9px;
+}
+.pk-w{
+  flex:1 1 0; height:100%;
+  background:linear-gradient(#FFFFFF, #F2F3F8);
+  border:1px solid #C9CEDF; border-radius:0 0 7px 7px;
+  margin-right:-1px; color:#8A90A6;
+}
+.pk-w.is-down{background:linear-gradient(#F6D9AE, #EFC98C); border-color:#D9A960; color:#7A5A22}
+.pk-b{
+  position:absolute; top:0; z-index:2;
+  width:6.4%; height:60%;
+  background:linear-gradient(#3A3F52, #212534);
+  border-radius:0 0 6px 6px; color:#AEB5CC;
+  box-shadow:0 3px 5px -1px rgba(0,0,0,.45);
+}
+.pk-b.is-down{background:linear-gradient(#B98A3E, #8E6522); color:#FFEBC4}
+.pk-key{font-family:var(--f-mono); font-size:11px; font-weight:500}
+.pk-n{font-size:10px; opacity:.7}
+.pk-b .pk-key{font-size:9.5px}
+body.piano-open .dock, body.piano-open .hints,
+body.piano-open .charbadge, body.piano-open .nowplaying{display:none}
 
 /* 확인 다이얼로그 */
 .askveil{
@@ -503,32 +660,103 @@ kbd{
 }
 .dropcard small{display:block; font-family:var(--f-body); font-size:13px; color:var(--muted); margin-top:5px}
 #toast{
-  position:fixed; left:50%; bottom:96px; z-index:95; transform:translate(-50%,12px);
+  position:fixed; left:50%; top:calc(16px + env(safe-area-inset-top, 0px)); bottom:auto;
+  z-index:95; transform:translate(-50%,-140%);
   padding:10px 19px; border-radius:999px; background:var(--ink); color:var(--surface);
   font-size:13.5px; box-shadow:var(--shadow-l);
-  opacity:0; visibility:hidden; transition:opacity .18s ease, transform .18s ease;
+  opacity:0; visibility:hidden;
+  transition:opacity .2s ease, transform .24s cubic-bezier(.2,.85,.3,1);
   max-width:min(90vw,520px); text-align:center;
 }
 #toast.is-on{opacity:1; visibility:visible; transform:translate(-50%,0)}
 
 /* --------------------------------------------------------------- 반응형 */
 @media (max-width:900px){
+  /* 보관함을 아래쪽 시트로 */
   .rail{
-    left:10px; right:10px; bottom:10px; top:auto; width:auto;
-    max-height:46vh; padding:12px;
+    left:8px; right:8px; bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+    top:auto; width:auto; height:auto;
+    padding:10px 10px 11px; gap:9px; border-radius:var(--r-l);
   }
-  #inv-list{grid-template-columns:repeat(auto-fill,minmax(86px,1fr)); max-height:30vh}
-  .panel-wrap{right:10px; top:10px}
+  .brand{display:none}
+  .rail .btn-primary{padding:10px 14px; font-size:14px}
+  .rail-h{font-size:11px}
+  body.inv-collapsed .rail{gap:8px}
+  #inv-list{
+    display:flex; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+    gap:8px; padding:2px 2px 4px; scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  .inv-card{flex:0 0 84px; scroll-snap-align:start}
+  .inv-take{padding:6px 4px 5px}
+  .inv-name{font-size:10.5px}
+  .inv-del{opacity:1; width:19px; height:19px}
+  .inv-empty{flex:1 1 auto; padding:16px 10px; font-size:12px}
+  .badge{font-size:8.5px; padding:2px 4px}
+
+  /* 방 꾸미기 */
+  .panel-wrap{
+    right:8px; top:calc(8px + env(safe-area-inset-top, 0px));
+    align-items:flex-end; max-width:calc(100vw - 16px);
+  }
+  .panel{width:min(280px, calc(100vw - 20px)); max-height:70vh; overflow-y:auto}
+
+  /* 조작 도크는 시트 위에 */
+  .dock{
+    left:8px; right:8px; bottom:auto;
+    top:calc(58px + env(safe-area-inset-top, 0px));
+    gap:8px;
+  }
+  .dock > *{max-width:100%}
+  .objbar{border-radius:var(--r-m); padding:7px 8px; gap:4px}
+  .objbar button{padding:7px 9px; font-size:12px}
+  .objbar-name{max-width:76px; font-size:12px}
+  .size-ctl{gap:6px; padding:0 4px}
+  .size-ctl label{display:none}
+  input[type=range]{width:78px}
+  .player, .popover, .lamp{width:100%}
+  .pl-list{max-height:132px}
+
   .hints, .charbadge{display:none}
-  .dock{left:10px; right:10px; bottom:auto; top:60px}
-  .dock > *{max-width:calc(100vw - 24px)}
-  .objbar{border-radius:var(--r-m)}
-  .player, .popover{width:min(340px, calc(100vw - 24px))}
-  .nowplaying{top:auto; bottom:calc(46vh + 20px)}
-  #toast{bottom:auto; top:auto; bottom:calc(46vh + 62px)}
+  #toast{top:calc(12px + env(safe-area-inset-top, 0px))}
+
+  /* 터치 조작기는 시트 위로 */
+  .pad{left:14px; bottom:calc(var(--sheet, 190px) + 14px)}
+  .padbtns{right:14px; bottom:calc(var(--sheet, 190px) + 14px)}
+  .pad-ring{width:106px; height:106px}
+  .pad-nub{width:44px; height:44px}
+  .padbtns button{width:70px; height:50px; border-radius:18px; font-size:13px}
+
+  /* 스튜디오는 전체 화면 */
   .studio{grid-template-columns:1fr}
   .studio-veil{display:none}
   .studio-panel{border-left:0}
+  .preview-wrap{height:210px}
+
+  /* 피아노 */
+  .keys{height:112px}
+  .pk-n{display:none}
+  .piano-title{font-size:14px}
+  .piano-ped, .piano-x{padding:5px 10px; font-size:11.5px}
+}
+
+/* 손가락으로 쓰는 화면 */
+@media (pointer: coarse){
+  .hints{display:none}
+  .inv-del{opacity:1}
+  .pl-x{opacity:1}
+  .btn, .chip-btn, .objbar button, .padbtns button{touch-action:manipulation}
+}
+
+/* 가로로 눕힌 작은 화면 */
+@media (max-width:900px) and (orientation:landscape){
+  .rail{right:auto; width:238px; top:8px; bottom:8px; height:auto}
+  #inv-list{flex-wrap:wrap; overflow-y:auto; overflow-x:hidden; max-height:none}
+  .inv-card{flex:0 0 calc(50% - 4px)}
+  .dock{left:254px; right:8px; top:8px}
+  .pad{left:254px; bottom:14px}
+  .padbtns{right:14px; bottom:14px}
+  #toast{bottom:14px}
 }
 </style>
 
@@ -541,15 +769,21 @@ kbd{
     <h1>복셀 공방<small>my voxel room</small></h1>
   </div>
 
-  <button class="btn btn-primary btn-block" type="button" data-open-file>그림으로 오브제 만들기</button>
+  <button class="btn btn-primary btn-block" type="button" data-open-file>사진으로 오브제 만들기</button>
 
-  <div class="rail-h">보관함 <span id="inv-count"></span></div>
+  <button class="rail-h" type="button" id="inv-toggle" aria-expanded="true" aria-controls="inv-list">
+    <span class="rail-caret" aria-hidden="true">▾</span>보관함
+    <span id="inv-count"></span>
+  </button>
   <div id="inv-list"></div>
 
-  <div class="rail-foot">
-    <button class="btn btn-ghost" type="button" id="export">방 내보내기</button>
-    <button class="btn btn-ghost" type="button" id="import">불러오기</button>
+  <!-- 재생 중 -->
+  <div class="nowplaying" id="nowplaying" hidden>
+    <button class="ico ico-play" type="button" id="np-toggle" aria-label="재생/일시정지"></button>
+    <span class="np-txt"><b id="np-name"></b><small id="np-from"></small></span>
+    <button type="button" id="np-stop" aria-label="정지">✕</button>
   </div>
+
 </aside>
 
 <!-- 방 설정 -->
@@ -574,6 +808,10 @@ kbd{
       </div>
     </div>
     <div class="panel-row">
+      <button class="btn btn-ghost" type="button" id="export">방 내보내기</button>
+      <button class="btn btn-ghost" type="button" id="import">불러오기</button>
+    </div>
+    <div class="panel-row">
       <button class="btn btn-ghost" type="button" id="cam-reset">시점 리셋</button>
       <button class="btn btn-ghost danger" type="button" id="wipe">방 비우기</button>
     </div>
@@ -595,7 +833,39 @@ kbd{
       <input type="checkbox" id="tr-music">
       <span><b>음악재생</b><small>선택하면 플레이리스트가 열리고 음악이 배경으로 흐릅니다.</small></span>
     </label>
+    <label class="trait">
+      <input type="checkbox" id="tr-lamp">
+      <span><b>전등</b><small>불을 껐다 켤 수 있고, 켜면 주변이 밝아집니다.</small></span>
+    </label>
+    <label class="trait">
+      <input type="checkbox" id="tr-piano">
+      <span><b>피아노</b><small>다가가서 연주하면 화면에 건반이 뜨고 키보드로 칠 수 있습니다.</small></span>
+    </label>
     <p class="pop-note">속성은 보관함 항목에 붙습니다. 같은 오브제를 여러 개 꺼내면 모두 같은 속성을 갖습니다.</p>
+  </div>
+
+  <!-- 전등 -->
+  <div class="lamp" id="lamp" hidden>
+    <div class="lamp-top">
+      <span class="lamp-title" id="lamp-title">전등</span>
+      <span class="lamp-state" id="lamp-state">켜짐</span>
+      <button class="lamp-switch" type="button" id="lamp-switch" role="switch" aria-checked="true" aria-label="불 켜고 끄기"><span></span></button>
+    </div>
+    <div class="lamp-body" id="lamp-body">
+      <div class="lamp-row">
+        <label for="lamp-bright">밝기</label>
+        <input type="range" id="lamp-bright" min="0.2" max="2" step="0.05" value="1">
+      </div>
+      <div class="lamp-row">
+        <span>불빛</span>
+        <div class="tint">
+          <button type="button" data-tint="warm"  aria-pressed="true"  aria-label="노란 불"></button>
+          <button type="button" data-tint="white" aria-pressed="false" aria-label="흰 불"></button>
+          <button type="button" data-tint="pink"  aria-pressed="false" aria-label="분홍 불"></button>
+          <button type="button" data-tint="cool"  aria-pressed="false" aria-label="푸른 불"></button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 음악 플레이어 -->
@@ -619,6 +889,8 @@ kbd{
     </div>
   </div>
 
+  <button class="chip-btn pianochip" id="pianochip" type="button" hidden>연주하기</button>
+
   <div class="charhint" id="charhint" hidden>
     <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 걷기 · <kbd>Space</kbd> 점프 · <kbd>Z</kbd> 앉기
   </div>
@@ -641,6 +913,20 @@ kbd{
   </div>
 </div>
 
+<!-- 다가가면 뜨는 말풍선 -->
+<button class="ui bubble" id="bubble" type="button" hidden>
+  <span id="bubble-label">사용하기</span><kbd id="bubble-key">E</kbd>
+</button>
+
+<!-- 터치용 캐릭터 조작기 -->
+<div class="ui pad" id="touchpad" hidden>
+  <div class="pad-ring"><span class="pad-nub" id="pad-nub"></span></div>
+</div>
+<div class="ui padbtns" id="touchbtns" hidden>
+  <button type="button" id="btn-sit">앉기</button>
+  <button type="button" id="btn-jump">점프</button>
+</div>
+
 <!-- 조작 중인 캐릭터 -->
 <div class="ui charbadge" id="charbadge" hidden>
   <span class="cb-dot"></span>
@@ -648,16 +934,22 @@ kbd{
   <button type="button" id="charbadge-release">해제</button>
 </div>
 
-<!-- 재생 중 -->
-<div class="ui nowplaying" id="nowplaying" hidden>
-  <button class="ico ico-play" type="button" id="np-toggle" aria-label="재생/일시정지"></button>
-  <span class="np-txt"><b id="np-name"></b><small id="np-from"></small></span>
-  <button type="button" id="np-stop" aria-label="정지">✕</button>
-</div>
-
 <div class="ui hints">
   <b>끌기</b> 옮기기 · <b>빈 곳 끌기</b> 시점 돌리기<br>
   <b>휠</b> 확대 (오브제 위에선 크기) · <kbd>R</kbd> 회전 · <kbd>Del</kbd> 치우기
+</div>
+
+<!-- 피아노 -->
+<div class="piano" id="piano" hidden>
+  <div class="piano-bar">
+    <span class="piano-title" id="piano-title">피아노</span>
+    <button class="piano-oct" type="button" id="oct-down" aria-label="한 옥타브 아래">◀</button>
+    <span class="piano-octv" id="oct-v">4옥타브</span>
+    <button class="piano-oct" type="button" id="oct-up" aria-label="한 옥타브 위">▶</button>
+    <button class="piano-ped" type="button" id="pedal">페달 <kbd>Space</kbd></button>
+    <button class="piano-x" type="button" id="piano-close">그만두기 <kbd>Esc</kbd></button>
+  </div>
+  <div class="keys" id="keys"></div>
 </div>
 
 <!-- 확인 다이얼로그 (샌드박스에서 window.confirm 이 막혀 직접 만든다) -->
@@ -706,14 +998,14 @@ kbd{
         <span class="ctrl-h">입체 방식</span>
         <div class="seg" role="group" aria-label="입체 방식">
           <button type="button" data-mode="inflate" aria-pressed="true"
-            data-note="실루엣 안쪽으로 갈수록 두꺼워집니다. 캐릭터나 손그림에 가장 잘 맞습니다.">부풀리기</button>
+            data-note="실루엣 안쪽으로 갈수록 두꺼워집니다. 인물·물건 사진이나 손그림에 가장 잘 맞습니다.">부풀리기</button>
           <button type="button" data-mode="flat" aria-pressed="false"
-            data-note="일정한 두께의 판으로 밀어냅니다. 로고·아이콘처럼 윤곽이 분명한 그림에 좋습니다.">판</button>
+            data-note="일정한 두께의 판으로 밀어냅니다. 로고·아이콘처럼 윤곽이 분명한 이미지에 좋습니다.">판</button>
           <button type="button" data-mode="relief" aria-pressed="false"
-            data-note="밝은 부분이 튀어나옵니다. 음영이 있는 그림이나 사진에 어울립니다.">릴리프</button>
+            data-note="밝은 부분이 튀어나옵니다. 음영이 살아 있는 사진에 어울립니다.">릴리프</button>
         </div>
       </div>
-      <p class="note" id="mode-note">실루엣 안쪽으로 갈수록 두꺼워집니다. 캐릭터나 손그림에 가장 잘 맞습니다.</p>
+      <p class="note" id="mode-note">실루엣 안쪽으로 갈수록 두꺼워집니다. 인물·물건 사진이나 손그림에 가장 잘 맞습니다.</p>
 
       <div class="rule"></div>
 
@@ -733,7 +1025,7 @@ kbd{
 </aside>
 
 <div id="dropveil">
-  <div class="dropcard">여기에 그림을 놓으세요<small>PNG · JPG · WEBP — 방 파일(.json)도 됩니다</small></div>
+  <div class="dropcard">여기에 사진을 놓으세요<small>PNG · JPG · WEBP — 방 파일(.json)도 됩니다</small></div>
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
@@ -4432,7 +4724,7 @@ void main() {
 
 window.THREE=module.exports;})();</script>
 <script>/* ==========================================================================
-   복셀 방 — 그림을 복셀 오브제로 깎아 보관함에 넣고, 내 방에 꺼내 꾸민다
+   복셀 방 — 사진을 복셀 오브제로 깎아 보관함에 넣고, 내 방에 꺼내 꾸민다
    ========================================================================== */
 (function () {
   'use strict';
@@ -4877,6 +5169,7 @@ window.THREE=module.exports;})();</script>
     var w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h, false);
     updateCamera();
+    syncTouchUI();
   }
 
   var RAIL_W = 292;
@@ -4884,14 +5177,27 @@ window.THREE=module.exports;})();</script>
   function updateCamera() {
     var N = room.size;
     var W = window.innerWidth, H = Math.max(1, window.innerHeight);
-    var rail = W > 900 ? RAIL_W : 0;         // 왼쪽 보관함이 가리는 폭
-    var usable = Math.max(320, W - rail);
-    camera.aspect = W / H;
+    var wide = W > 900;
 
-    // 방이 화면에 꽉 차도록 거리를 잡는다 (좁은 화각 = 동물의숲 같은 디오라마 원근)
+    // UI 가 가리는 만큼을 빼고 남는 자리에 방을 맞춘다
+    var rail = wide ? RAIL_W : 0;                       // 왼쪽 보관함
+    var padTop = wide ? 0 : 62;                         // 위쪽 칩
+    var padBottom = 0;                                  // 아래쪽 시트
+    if (!wide) {
+      var sheet = document.querySelector('.rail');
+      padBottom = sheet ? Math.min(H * 0.46, sheet.getBoundingClientRect().height + 18) : 190;
+    }
+    var usableW = Math.max(280, W - rail);
+    var usableH = Math.max(220, H - padTop - padBottom);
+
+    camera.aspect = W / H;
     var need = N * 1.34;
     var tanV = Math.tan(FOV * Math.PI / 360);
-    var dist = Math.max(need / (2 * tanV), (need * 1.06) / (2 * tanV * (usable / H))) / view.zoom;
+    var vNeed = Math.max(
+      need * (H / usableH),
+      (need * 1.06) * (W / usableW) / camera.aspect
+    );
+    var dist = vNeed / (2 * tanV) / view.zoom;
 
     var ty = N * 0.12;
     camera.position.set(
@@ -4902,8 +5208,12 @@ window.THREE=module.exports;})();</script>
     camera.lookAt(0, ty, 0);
     camera.near = Math.max(0.5, dist * 0.05);
     camera.far = dist * 3.5;
-    // 보관함이 가린 만큼 방을 오른쪽으로 밀어 준다
-    camera.setViewOffset(W, H, -rail / 2, 0, W, H);
+
+    // 남는 자리의 한가운데로 방을 옮긴다
+    document.documentElement.style.setProperty('--sheet', Math.round(padBottom) + 'px');
+    var dx = (rail + usableW / 2) - W / 2;
+    var dy = (padTop + usableH / 2) - H / 2;
+    camera.setViewOffset(W, H, -dx, -dy, W, H);
     updateWalls();
   }
 
@@ -4966,9 +5276,15 @@ window.THREE=module.exports;})();</script>
       rot: opts.rot || 0,
       h: opts.h || clamp(2.6 * (data.gh / Math.max(data.gw, data.gh)) + 0.8, 0.8, 5)
     };
+    p.lamp = {
+      on: opts.lamp && opts.lamp.on !== undefined ? !!opts.lamp.on : true,
+      bright: (opts.lamp && opts.lamp.bright) || 1,
+      tint: (opts.lamp && LAMP_TINTS[opts.lamp.tint]) ? opts.lamp.tint : 'warm'
+    };
     placed.push(p);
     applyTransform(p);
     if (item.traits && item.traits.character) attachChar(p);
+    if (item.traits && item.traits.lamp) attachLamp(p);
     return p;
   }
 
@@ -4981,6 +5297,7 @@ window.THREE=module.exports;})();</script>
   }
 
   function removePlaced(p) {
+    detachLamp(p);
     scene.remove(p.group);
     p.mesh.dispose();
     p.mesh.material.dispose();
@@ -5110,11 +5427,32 @@ window.THREE=module.exports;})();</script>
 
   /* ------------------------------------------------------------- 입력 */
   var drag = null;
+  var pointers = Object.create(null);
+  var pointerN = 0;
+  var pinch = null;
+
+  function pinchDist() {
+    var ids = Object.keys(pointers);
+    if (ids.length < 2) return 0;
+    var a = pointers[ids[0]], b = pointers[ids[1]];
+    return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+  }
 
   function onDown(e) {
     if (e.button === 2) return;
-    if (studio.open) return;
+    if (studio.open || piano.open) return;
     if (e.target.closest && e.target.closest('.ui, .studio, #dropveil')) return;
+
+    pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    pointerN++;
+    if (pointerN === 2) {                       // 두 손가락 = 확대·축소
+      drag = null;
+      document.body.classList.remove('grabbing', 'orbiting');
+      pinch = { d0: pinchDist(), z0: view.zoom };
+      return;
+    }
+    if (pointerN > 2) return;
+
     var p = hitPlaced(e.clientX, e.clientY);
     if (p) {
       select(p);
@@ -5130,7 +5468,17 @@ window.THREE=module.exports;})();</script>
   }
 
   function onMove(e) {
+    if (pointers[e.pointerId]) { pointers[e.pointerId].x = e.clientX; pointers[e.pointerId].y = e.clientY; }
+    if (pinch) {
+      var d = pinchDist();
+      if (d > 8 && pinch.d0 > 8) {
+        view.zoom = clamp(pinch.z0 * (d / pinch.d0), 0.45, 3.2);
+        updateCamera();
+      }
+      return;
+    }
     if (!drag) {
+      if (touchMode()) return;
       var over = hitPlaced(e.clientX, e.clientY);
       document.body.classList.toggle('over-obj', !!over);
       return;
@@ -5148,7 +5496,9 @@ window.THREE=module.exports;})();</script>
     }
   }
 
-  function onUp() {
+  function onUp(e) {
+    if (e && pointers[e.pointerId]) { delete pointers[e.pointerId]; pointerN = Math.max(0, pointerN - 1); }
+    if (pinch && pointerN < 2) pinch = null;
     if (drag) {
       if (drag.mode === 'move' && drag.moved) save();
       document.body.classList.remove('grabbing', 'orbiting');
@@ -5173,6 +5523,7 @@ window.THREE=module.exports;})();</script>
     var p = selected;
     p.h = clamp(h, 0.3, 7);
     moveTo(p, p.x, p.z);
+    applyLamp(p);
     $('#size').value = p.h;
     $('#size-v').textContent = p.h.toFixed(1) + '칸';
     updateMarker();
@@ -5204,6 +5555,7 @@ window.THREE=module.exports;})();</script>
 
     if (k === 'escape') {
       if (!$('#askbox').hasAttribute('hidden')) { answer(false); return; }
+      if (piano.open) { closePiano(); return; }
       if (studio.open) { closeStudio(); return; }
       select(null);
       return;
@@ -5212,7 +5564,13 @@ window.THREE=module.exports;})();</script>
       if (k === 'enter') answer(true);
       return;
     }
+    if (piano.open) { onPianoKey(e, true); return; }
     if (studio.open) return;
+
+    // 오브제 사용 (A 는 왼쪽으로 걷기라 E 를 쓴다)
+    if (k === 'e' || k === 'ㄷ' || k === 'enter') {
+      if (nearTarget) { e.preventDefault(); doInteract(nearTarget); return; }
+    }
 
     // 캐릭터 조작
     if (MOVE_KEYS[k]) { keys[MOVE_KEYS[k]] = true; if (activeChar) e.preventDefault(); return; }
@@ -5231,15 +5589,23 @@ window.THREE=module.exports;})();</script>
   }
 
   function onKeyUp(e) {
+    if (piano.open) { onPianoKey(e, false); return; }
     var k = (e.key || '').toLowerCase();
     if (MOVE_KEYS[k]) keys[MOVE_KEYS[k]] = false;
   }
 
-  function releaseKeys() { for (var k in keys) keys[k] = false; }
+  function releaseKeys() {
+    for (var k in keys) keys[k] = false;
+    stick.on = false; stick.x = 0; stick.y = 0;
+  }
 
   /* ================================================================
      5. 보관함
      ================================================================ */
+
+  function touchMode() {
+    return window.matchMedia('(pointer: coarse)').matches;
+  }
 
   function itemById(id) {
     for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i];
@@ -5297,7 +5663,7 @@ window.THREE=module.exports;})();</script>
     if (!items.length) {
       var empty = document.createElement('p');
       empty.className = 'inv-empty';
-      empty.textContent = '아직 오브제가 없습니다. 그림을 올려 첫 오브제를 깎아 보세요.';
+      empty.textContent = '아직 오브제가 없습니다. 사진을 올려 첫 오브제를 깎아 보세요.';
       list.appendChild(empty);
       return;
     }
@@ -5308,6 +5674,8 @@ window.THREE=module.exports;})();</script>
       var badges = '';
       if (tr.character) badges += '<span class="badge badge-c">캐릭터</span>';
       if (tr.music) badges += '<span class="badge badge-m">음악</span>';
+      if (tr.lamp) badges += '<span class="badge badge-l">전등</span>';
+      if (tr.piano) badges += '<span class="badge badge-p">피아노</span>';
       card.innerHTML =
         '<button class="inv-take" type="button" title="방에 꺼내기">' +
           '<img src="' + it.thumb + '" alt="">' +
@@ -5376,6 +5744,7 @@ window.THREE=module.exports;})();</script>
     placed.forEach(function (p) {
       if (p.itemId !== item.id) return;
       if (name === 'character') { if (on) attachChar(p); else detachChar(p); }
+      if (name === 'lamp') { if (on) attachLamp(p); else detachLamp(p); }
     });
     if (name === 'music' && !on && music.itemId === item.id) stopMusic();
     renderInventory();
@@ -5438,6 +5807,7 @@ window.THREE=module.exports;})();</script>
 
   /* ------------------------------------------------------------- 캐릭터 */
   var keys = Object.create(null);
+  var stick = { on: false, x: 0, y: 0 };
   var activeChar = null;
 
   function attachChar(p) {
@@ -5461,10 +5831,22 @@ window.THREE=module.exports;})();</script>
   function setActiveChar(p) {
     activeChar = p;
     var badge = $('#charbadge');
-    if (!p) { badge.setAttribute('hidden', ''); return; }
-    badge.removeAttribute('hidden');
-    var it = itemById(p.itemId);
-    $('#charbadge-name').textContent = it ? it.name : '캐릭터';
+    if (!p) { badge.setAttribute('hidden', ''); }
+    else {
+      badge.removeAttribute('hidden');
+      var it = itemById(p.itemId);
+      $('#charbadge-name').textContent = it ? it.name : '캐릭터';
+    }
+    syncTouchUI();
+  }
+
+  // 손가락으로 쓰는 화면에서만 조이스틱과 버튼을 띄운다
+  function syncTouchUI() {
+    var show = !!activeChar && touchMode() && !piano.open;
+    var pad = $('#touchpad'), btns = $('#touchbtns');
+    if (!pad) return;
+    if (show) { pad.removeAttribute('hidden'); btns.removeAttribute('hidden'); }
+    else { pad.setAttribute('hidden', ''); btns.setAttribute('hidden', ''); }
   }
 
   function updateCharacters(dt, t) {
@@ -5478,13 +5860,19 @@ window.THREE=module.exports;})();</script>
       var live = (p === activeChar) && !(drag && drag.p === p) && !studio.open;
 
       var mvx = 0, mvz = 0;
-      if (live && !c.sitting) {
-        if (keys.w) { mvx += fx; mvz += fz; }
-        if (keys.s) { mvx -= fx; mvz -= fz; }
-        if (keys.d) { mvx += rx; mvz += rz; }
-        if (keys.a) { mvx -= rx; mvz -= rz; }
+      if (live && !c.sitting && !piano.open) {
+        if (stick.on) {
+          // 화면 조이스틱: 위로 밀면 앞으로
+          mvx = fx * (-stick.y) + rx * stick.x;
+          mvz = fz * (-stick.y) + rz * stick.x;
+        } else {
+          if (keys.w) { mvx += fx; mvz += fz; }
+          if (keys.s) { mvx -= fx; mvz -= fz; }
+          if (keys.d) { mvx += rx; mvz += rz; }
+          if (keys.a) { mvx -= rx; mvz -= rz; }
+        }
         var len = Math.sqrt(mvx * mvx + mvz * mvz);
-        if (len > 0) { mvx /= len; mvz /= len; }
+        if (len > 1) { mvx /= len; mvz /= len; }
       }
 
       var maxSpd = 2.3 + p.h * 0.32;
@@ -5610,9 +5998,13 @@ window.THREE=module.exports;})();</script>
     playTrack(item, next);
   }
 
-  function togglePlay() {
-    var item = selectedItem();
-    if (!item || !item.tracks || !item.tracks.length) return;
+  function togglePlay() { togglePlayFor(selectedItem()); }
+
+  function togglePlayFor(item) {
+    if (!item || !item.tracks || !item.tracks.length) {
+      if (item) toast('‘' + item.name + '’에 담긴 음악이 없습니다.');
+      return;
+    }
     if (music.itemId === item.id && music.audio.src) {
       if (music.audio.paused) music.audio.play().catch(function () {});
       else music.audio.pause();
@@ -5768,12 +6160,402 @@ window.THREE=module.exports;})();</script>
     }
   }
 
+  /* ------------------------------------------------------------- 전등 */
+
+  var LAMP_TINTS = {
+    warm:  { name: '노란 불', hex: 0xFFC069 },
+    white: { name: '흰 불',   hex: 0xFFF4E2 },
+    pink:  { name: '분홍 불', hex: 0xFFA3C4 },
+    cool:  { name: '푸른 불', hex: 0x9FC8FF }
+  };
+
+  var _glowTex = null;
+  function glowTexture() {
+    if (_glowTex) return _glowTex;
+    var c = document.createElement('canvas');
+    c.width = c.height = 128;
+    var g = c.getContext('2d');
+    var grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grd.addColorStop(0, 'rgba(255,255,255,1)');
+    grd.addColorStop(0.28, 'rgba(255,255,255,0.42)');
+    grd.addColorStop(0.62, 'rgba(255,255,255,0.10)');
+    grd.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 128, 128);
+    _glowTex = new T.CanvasTexture(c);
+    _glowTex.colorSpace = T.SRGBColorSpace;
+    return _glowTex;
+  }
+
+  function attachLamp(p) {
+    if (p.lampLight) return;
+    if (!p.lamp) p.lamp = { on: true, bright: 1, tint: 'warm' };
+    var light = new T.PointLight(0xffffff, 0, 10, 1.7);
+    var glow = new T.Sprite(new T.SpriteMaterial({
+      map: glowTexture(), color: 0xffffff, transparent: true,
+      blending: T.AdditiveBlending, depthWrite: false, opacity: 0
+    }));
+    glow.renderOrder = 3;
+    p.group.add(light, glow);
+    p.lampLight = light;
+    p.lampGlow = glow;
+    applyLamp(p);
+  }
+
+  function detachLamp(p) {
+    if (!p.lampLight) return;
+    p.group.remove(p.lampLight, p.lampGlow);
+    p.lampGlow.material.dispose();
+    p.lampLight = p.lampGlow = null;
+    p.mesh.material.emissive.setRGB(0, 0, 0);
+  }
+
+  function applyLamp(p) {
+    if (!p.lampLight) return;
+    var L = p.lamp, tint = LAMP_TINTS[L.tint] || LAMP_TINTS.warm;
+    var on = L.on ? 1 : 0, b = L.bright;
+
+    p.lampLight.color.setHex(tint.hex, T.SRGBColorSpace);
+    p.lampLight.intensity = on * b * 9 * Math.max(1, p.h * 0.5);
+    p.lampLight.distance = 6 + b * 7;
+    p.lampLight.position.set(0, p.h * 0.72, 0);
+
+    p.lampGlow.material.color.setHex(tint.hex, T.SRGBColorSpace);
+    p.lampGlow.material.opacity = on * Math.min(0.85, 0.35 + b * 0.3);
+    p.lampGlow.position.set(0, p.h * 0.72, 0);
+    var s = p.h * (1.1 + b * 0.5);
+    p.lampGlow.scale.set(s, s, 1);
+    p.lampGlow.visible = !!on;
+
+    // 켜지면 오브제 자체도 은은하게 빛난다
+    _color.setHex(tint.hex, T.SRGBColorSpace).multiplyScalar(on * Math.min(0.34, 0.14 + b * 0.1));
+    p.mesh.material.emissive.copy(_color);
+  }
+
+  function toggleLamp(p, on) {
+    if (!p.lamp) return;
+    p.lamp.on = on === undefined ? !p.lamp.on : !!on;
+    applyLamp(p);
+    renderLampPanel();
+    save();
+  }
+
+  function renderLampPanel() {
+    var p = selected;
+    if (!p || !p.lamp) return;
+    var it = itemById(p.itemId);
+    $('#lamp-title').textContent = it ? it.name : '전등';
+    var sw = $('#lamp-switch');
+    sw.setAttribute('aria-checked', p.lamp.on ? 'true' : 'false');
+    $('#lamp-state').textContent = p.lamp.on ? '켜짐' : '꺼짐';
+    $('#lamp-bright').value = p.lamp.bright;
+    $('#lamp-bright').disabled = !p.lamp.on;
+    $$('.tint button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.tint === p.lamp.tint ? 'true' : 'false');
+    });
+    $('#lamp-body').classList.toggle('is-off', !p.lamp.on);
+  }
+
+  /* ==================================================================
+     피아노 — 다가가서 연주하는 오브제
+     ================================================================== */
+
+  var piano = {
+    ctx: null, master: null, open: false, octave: 4,
+    voices: Object.create(null), pedal: false, held: Object.create(null)
+  };
+
+  // 흰건반 10개 + 검은건반 7개 (C 부터 다음 옥타브 E 까지)
+  var KEYS = [
+    { k: 'a', s: 0,  b: false, n: '도' },
+    { k: 'w', s: 1,  b: true,  n: '도♯' },
+    { k: 's', s: 2,  b: false, n: '레' },
+    { k: 'e', s: 3,  b: true,  n: '레♯' },
+    { k: 'd', s: 4,  b: false, n: '미' },
+    { k: 'f', s: 5,  b: false, n: '파' },
+    { k: 't', s: 6,  b: true,  n: '파♯' },
+    { k: 'g', s: 7,  b: false, n: '솔' },
+    { k: 'y', s: 8,  b: true,  n: '솔♯' },
+    { k: 'h', s: 9,  b: false, n: '라' },
+    { k: 'u', s: 10, b: true,  n: '라♯' },
+    { k: 'j', s: 11, b: false, n: '시' },
+    { k: 'k', s: 12, b: false, n: '도' },
+    { k: 'o', s: 13, b: true,  n: '도♯' },
+    { k: 'l', s: 14, b: false, n: '레' },
+    { k: 'p', s: 15, b: true,  n: '레♯' },
+    { k: ';', s: 16, b: false, n: '미' }
+  ];
+  var KEY_BY_CHAR = Object.create(null);
+  KEYS.forEach(function (k) { KEY_BY_CHAR[k.k] = k; });
+
+  function audio() {
+    if (!piano.ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      piano.ctx = new AC();
+      piano.master = piano.ctx.createGain();
+      piano.master.gain.value = 0.26;
+      var comp = piano.ctx.createDynamicsCompressor();
+      piano.master.connect(comp);
+      comp.connect(piano.ctx.destination);
+    }
+    if (piano.ctx.state === 'suspended') piano.ctx.resume();
+    return piano.ctx;
+  }
+
+  // 2-오퍼레이터 FM — 전자피아노에 가까운 맑은 소리
+  function noteOn(sem) {
+    var ctx = audio();
+    if (!ctx || piano.voices[sem]) return;
+    var t = ctx.currentTime;
+    var midi = 12 * (piano.octave + 1) + sem;
+    var f = 440 * Math.pow(2, (midi - 69) / 12);
+
+    var out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, t);
+    out.gain.exponentialRampToValueAtTime(0.9, t + 0.008);
+    out.gain.exponentialRampToValueAtTime(0.30, t + 0.30);
+    out.gain.exponentialRampToValueAtTime(0.04, t + 3.4);
+
+    var filt = ctx.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.Q.value = 0.7;
+    filt.frequency.setValueAtTime(Math.min(11000, f * 11), t);
+    filt.frequency.exponentialRampToValueAtTime(Math.max(420, f * 3), t + 1.1);
+
+    var car = ctx.createOscillator();
+    car.type = 'sine';
+    car.frequency.value = f;
+    var mod = ctx.createOscillator();
+    mod.type = 'sine';
+    mod.frequency.value = f * 3;
+    var modGain = ctx.createGain();
+    modGain.gain.setValueAtTime(f * 2.4, t);
+    modGain.gain.exponentialRampToValueAtTime(f * 0.04, t + 0.55);
+    mod.connect(modGain);
+    modGain.connect(car.frequency);
+
+    var body = ctx.createOscillator();          // 살짝 어긋난 삼각파로 몸통을 채운다
+    body.type = 'triangle';
+    body.frequency.value = f;
+    body.detune.value = 7;
+    var bodyG = ctx.createGain();
+    bodyG.gain.value = 0.3;
+    body.connect(bodyG);
+    bodyG.connect(filt);
+
+    car.connect(filt);
+    filt.connect(out);
+    out.connect(piano.master);
+    car.start(t); mod.start(t); body.start(t);
+
+    piano.voices[sem] = { out: out, nodes: [car, mod, body] };
+    var el = $('#pk-' + sem);
+    if (el) el.classList.add('is-down');
+  }
+
+  function noteOff(sem, hard) {
+    var v = piano.voices[sem];
+    var el = $('#pk-' + sem);
+    if (el) el.classList.remove('is-down');
+    if (!v) return;
+    if (piano.pedal && !hard) return;           // 페달을 밟고 있으면 계속 울린다
+    delete piano.voices[sem];
+    var ctx = piano.ctx, t = ctx.currentTime;
+    var rel = hard ? 0.04 : 0.36;
+    try {
+      v.out.gain.cancelScheduledValues(t);
+      v.out.gain.setValueAtTime(Math.max(0.0001, v.out.gain.value), t);
+      v.out.gain.exponentialRampToValueAtTime(0.0001, t + rel);
+    } catch (e) {}
+    v.nodes.forEach(function (n) { try { n.stop(t + rel + 0.06); } catch (e) {} });
+  }
+
+  function releasePedal() {
+    piano.pedal = false;
+    $('#pedal').classList.remove('is-down');
+    Object.keys(piano.voices).forEach(function (sem) {
+      if (!piano.held[sem]) noteOff(+sem);
+    });
+  }
+
+  function allNotesOff() {
+    Object.keys(piano.voices).forEach(function (sem) { noteOff(+sem, true); });
+    piano.held = Object.create(null);
+  }
+
+  function buildKeyboard() {
+    var wrap = $('#keys');
+    if (wrap.childElementCount) return;
+    var whites = KEYS.filter(function (k) { return !k.b; });
+    var wc = whites.length;
+    wrap.style.setProperty('--wc', wc);
+    whites.forEach(function (k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pk pk-w';
+      b.id = 'pk-' + k.s;
+      b.dataset.sem = k.s;
+      b.innerHTML = '<span class="pk-key"></span><span class="pk-n"></span>';
+      b.querySelector('.pk-key').textContent = k.k.toUpperCase();
+      b.querySelector('.pk-n').textContent = k.n;
+      wrap.appendChild(b);
+    });
+    KEYS.filter(function (k) { return k.b; }).forEach(function (k) {
+      var before = whites.filter(function (w) { return w.s < k.s; }).length;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pk pk-b';
+      b.id = 'pk-' + k.s;
+      b.dataset.sem = k.s;
+      b.style.left = 'calc(' + before + ' * (100% / var(--wc)) - 3.2%)';
+      b.innerHTML = '<span class="pk-key"></span>';
+      b.querySelector('.pk-key').textContent = k.k.toUpperCase();
+      wrap.appendChild(b);
+    });
+
+    // 건반을 눌러서도 연주
+    var downOn = null;
+    wrap.addEventListener('pointerdown', function (e) {
+      var b = e.target.closest('.pk');
+      if (!b) return;
+      e.preventDefault();
+      downOn = +b.dataset.sem;
+      piano.held[downOn] = 1;
+      noteOn(downOn);
+      wrap.setPointerCapture(e.pointerId);
+    });
+    wrap.addEventListener('pointerup', function () {
+      if (downOn === null) return;
+      delete piano.held[downOn];
+      noteOff(downOn);
+      downOn = null;
+    });
+    wrap.addEventListener('pointercancel', function () {
+      if (downOn === null) return;
+      delete piano.held[downOn];
+      noteOff(downOn);
+      downOn = null;
+    });
+  }
+
+  function openPiano(p) {
+    buildKeyboard();
+    piano.open = true;
+    piano.objKey = p ? p.key : null;
+    releaseKeys();
+    var it = p ? itemById(p.itemId) : null;
+    $('#piano-title').textContent = it ? it.name : '피아노';
+    $('#piano').removeAttribute('hidden');
+    document.body.classList.add('piano-open');
+    updateOctave();
+    syncTouchUI();
+    audio();
+  }
+
+  function closePiano() {
+    allNotesOff();
+    releasePedal();
+    piano.open = false;
+    $('#piano').setAttribute('hidden', '');
+    document.body.classList.remove('piano-open');
+    syncTouchUI();
+  }
+
+  function updateOctave() {
+    $('#oct-v').textContent = piano.octave + '옥타브';
+    $('#oct-down').disabled = piano.octave <= 1;
+    $('#oct-up').disabled = piano.octave >= 6;
+  }
+
+  function shiftOctave(d) {
+    allNotesOff();
+    piano.octave = clamp(piano.octave + d, 1, 6);
+    updateOctave();
+  }
+
+  function onPianoKey(e, down) {
+    var k = (e.key || '').toLowerCase();
+    if (k === 'escape') { if (down) closePiano(); return true; }
+    if (k === ' ' || k === 'spacebar') {
+      e.preventDefault();
+      if (down) { piano.pedal = true; $('#pedal').classList.add('is-down'); }
+      else releasePedal();
+      return true;
+    }
+    var key = KEY_BY_CHAR[k];
+    if (!key) return false;
+    e.preventDefault();
+    if (down) {
+      if (piano.held[key.s]) return true;      // 키 반복 무시
+      piano.held[key.s] = 1;
+      noteOn(key.s);
+    } else {
+      delete piano.held[key.s];
+      noteOff(key.s);
+    }
+    return true;
+  }
+
+  /* ==================================================================
+     상호작용 — 다가가면 말풍선, E 또는 클릭으로 사용
+     ================================================================== */
+
+  var nearTarget = null;
+  var _proj = new T.Vector3();
+
+  function interactLabel(p) {
+    var tr = traitsOf(p.itemId);
+    if (tr.piano) return '연주하기';
+    if (tr.music) return (music.playing && music.itemId === p.itemId) ? '음악 끄기' : '음악 켜기';
+    if (tr.lamp) return (p.lamp && p.lamp.on) ? '불 끄기' : '불 켜기';
+    return null;
+  }
+
+  function doInteract(p) {
+    if (!p) return;
+    var tr = traitsOf(p.itemId);
+    if (tr.piano) { openPiano(p); return; }
+    if (tr.music) { togglePlayFor(itemById(p.itemId)); return; }
+    if (tr.lamp) { toggleLamp(p); return; }
+  }
+
+  function updateBubble() {
+    var el = $('#bubble');
+    var c = activeChar;
+    if (!c || piano.open || studio.open || !c.char) {
+      if (nearTarget) { el.setAttribute('hidden', ''); nearTarget = null; }
+      return;
+    }
+    var best = null, bd = 2.6;
+    for (var i = 0; i < placed.length; i++) {
+      var p = placed[i];
+      if (p === c || !interactLabel(p)) continue;
+      var d = Math.sqrt((p.x - c.x) * (p.x - c.x) + (p.z - c.z) * (p.z - c.z));
+      if (d < bd) { bd = d; best = p; }
+    }
+    if (!best) {
+      if (nearTarget) { el.setAttribute('hidden', ''); nearTarget = null; }
+      return;
+    }
+    nearTarget = best;
+    _proj.set(best.x, best.y + best.h + 0.55, best.z).project(camera);
+    if (_proj.z > 1) { el.setAttribute('hidden', ''); return; }
+    el.removeAttribute('hidden');
+    $('#bubble-label').textContent = interactLabel(best);
+    $('#bubble-key').hidden = touchMode();
+    el.style.left = ((_proj.x * 0.5 + 0.5) * window.innerWidth) + 'px';
+    el.style.top = ((-_proj.y * 0.5 + 0.5) * window.innerHeight) + 'px';
+  }
+
   /* --------------------------------------------------------- 속성 패널 */
   function renderTraitPanel() {
     var item = selectedItem();
     if (!item) return;
     $('#tr-character').checked = !!(item.traits && item.traits.character);
     $('#tr-music').checked = !!(item.traits && item.traits.music);
+    $('#tr-lamp').checked = !!(item.traits && item.traits.lamp);
+    $('#tr-piano').checked = !!(item.traits && item.traits.piano);
   }
 
   function syncPanels(p) {
@@ -5781,7 +6563,10 @@ window.THREE=module.exports;})();</script>
     var tr = (it && it.traits) || {};
     $('#player').hidden = !tr.music;
     if (tr.music) renderPlaylist();
-    $('#charhint').hidden = !tr.character;
+    $('#lamp').hidden = !tr.lamp;
+    if (tr.lamp) renderLampPanel();
+    $('#pianochip').hidden = !tr.piano;
+    $('#charhint').hidden = !(tr.character && !touchMode());
     if (p && p.char) setActiveChar(p);
   }
 
@@ -5803,7 +6588,10 @@ window.THREE=module.exports;})();</script>
         };
       }),
       placed: placed.map(function (p) {
-        return { key: p.key, itemId: p.itemId, x: p.x, z: p.z, y: p.y, rot: p.rot, h: p.h };
+        return {
+          key: p.key, itemId: p.itemId, x: p.x, z: p.z, y: p.y, rot: p.rot, h: p.h,
+          lamp: p.lamp ? { on: p.lamp.on, bright: p.lamp.bright, tint: p.lamp.tint } : undefined
+        };
       })
     };
   }
@@ -5853,7 +6641,7 @@ window.THREE=module.exports;})();</script>
       (state.placed || []).forEach(function (rec) {
         var it = itemById(rec.itemId);
         if (!it) return;
-        var p = placeItem(it, rec.x, rec.z, { key: rec.key, y: rec.y, rot: rec.rot, h: rec.h });
+        var p = placeItem(it, rec.x, rec.z, { key: rec.key, y: rec.y, rot: rec.rot, h: rec.h, lamp: rec.lamp });
         applyTransform(p);
       });
       return items.length > 0;
@@ -6194,6 +6982,28 @@ window.THREE=module.exports;})();</script>
     return c;
   }
 
+  function drawPiano() {
+    var c = newCanvas(340), x = c.getContext('2d');
+    x.fillStyle = '#6B4A33'; x.fillRect(58, 74, 224, 214);          // 몸통
+    x.fillStyle = '#7C573C'; x.fillRect(50, 60, 240, 22);           // 상판
+    x.fillStyle = '#5A3D2A'; x.fillRect(58, 74, 26, 214);           // 옆면 그늘
+    x.fillStyle = '#8A6242'; x.fillRect(74, 96, 192, 78);           // 앞판
+    x.fillStyle = '#4C3324';
+    for (var i = 0; i < 7; i++) x.fillRect(84 + i * 26, 106, 8, 58); // 살대
+    x.fillStyle = '#F6F2E8'; x.fillRect(66, 186, 208, 40);          // 건반
+    x.fillStyle = '#2A2634';
+    [0, 1, 3, 4, 5].forEach(function (k, n) {
+      for (var o = 0; o < 3; o++) {
+        var bx = 74 + o * 68 + [10, 26, 48, 62, 76][n] * 0.62;
+        if (bx < 262) x.fillRect(bx, 186, 9, 24);
+      }
+    });
+    x.fillStyle = '#5A3D2A'; x.fillRect(66, 226, 208, 16);          // 건반 아래턱
+    x.fillStyle = '#4C3324'; x.fillRect(74, 288, 26, 26);           // 다리
+    x.fillRect(240, 288, 26, 26);
+    return c;
+  }
+
   function canvasToImage(c) { return loadImage(c.toDataURL()); }
 
   function seedRoom() {
@@ -6201,8 +7011,9 @@ window.THREE=module.exports;})();</script>
       { draw: drawMushroom, name: '버섯', grid: 60, depth: 13, h: 2.4, x: -1.5, z: 1.5, traits: { character: true } },
       { draw: drawSpeaker, name: '스피커', grid: 56, depth: 16, h: 2.2, x: 3.5, z: -3, traits: { music: true } },
       { draw: drawPlant, name: '화분', grid: 60, depth: 14, h: 3.0, x: -4, z: -3 },
-      { draw: drawLamp, name: '스탠드', grid: 56, depth: 12, h: 3.4, x: 4, z: 2 },
-      { draw: drawStar, name: '별', grid: 44, depth: 11, h: 1.2, x: 0.5, z: -2 }
+      { draw: drawLamp, name: '스탠드', grid: 56, depth: 12, h: 3.4, x: 4, z: 2, traits: { lamp: true } },
+      { draw: drawStar, name: '별', grid: 44, depth: 11, h: 1.2, x: 0.5, z: -2 },
+      { draw: drawPiano, name: '피아노', grid: 60, depth: 20, h: 2.6, x: -4.5, z: 1.5, traits: { piano: true } }
     ];
     return specs.reduce(function (chain, s) {
       return chain.then(function () {
@@ -6334,6 +7145,10 @@ window.THREE=module.exports;})();</script>
     });
     $('#ask-ok').addEventListener('click', function () { answer(true); });
     $('#ask-no').addEventListener('click', function () { answer(false); });
+    $('#inv-toggle').addEventListener('click', function () {
+      var open = !document.body.classList.toggle('inv-collapsed');
+      this.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
     $('#panel-toggle').addEventListener('click', function () {
       var open = document.body.classList.toggle('panel-open');
       this.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -6395,6 +7210,90 @@ window.THREE=module.exports;})();</script>
       else music.audio.pause();
     });
     $('#np-stop').addEventListener('click', stopMusic);
+
+    /* ----------------------------------------------------- 전등 조작 */
+    $('#tr-lamp').addEventListener('change', function () {
+      var it = selectedItem();
+      if (it) setTrait(it, 'lamp', this.checked);
+    });
+    $('#lamp-switch').addEventListener('click', function () {
+      if (selected) toggleLamp(selected);
+    });
+    $('#lamp-bright').addEventListener('input', function () {
+      if (!selected || !selected.lamp) return;
+      selected.lamp.bright = +this.value;
+      applyLamp(selected);
+      saveSoon();
+    });
+    $$('.tint button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!selected || !selected.lamp) return;
+        selected.lamp.tint = b.dataset.tint;
+        applyLamp(selected);
+        renderLampPanel();
+        save();
+      });
+    });
+
+    /* --------------------------------------------------- 피아노 조작 */
+    $('#tr-piano').addEventListener('change', function () {
+      var it = selectedItem();
+      if (it) setTrait(it, 'piano', this.checked);
+    });
+    $('#pianochip').addEventListener('click', function () { openPiano(selected); });
+    $('#piano-close').addEventListener('click', closePiano);
+    $('#oct-down').addEventListener('click', function () { shiftOctave(-1); });
+    $('#oct-up').addEventListener('click', function () { shiftOctave(1); });
+    var ped = $('#pedal');
+    ped.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); piano.pedal = true; ped.classList.add('is-down');
+    });
+    ped.addEventListener('pointerup', releasePedal);
+    ped.addEventListener('pointerleave', function () { if (piano.pedal) releasePedal(); });
+
+    /* ------------------------------------------------- 말풍선 / 사용 */
+    $('#bubble').addEventListener('click', function () { doInteract(nearTarget); });
+
+    /* --------------------------------------------------- 터치 조작기 */
+    var pad = $('#touchpad'), nub = $('#pad-nub');
+    var padId = null, padC = null, padR = 44;
+    function padSet(cx, cy) {
+      var dx = cx - padC.x, dy = cy - padC.y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d > padR) { dx *= padR / d; dy *= padR / d; d = padR; }
+      stick.on = d > 6;
+      stick.x = dx / padR;
+      stick.y = dy / padR;
+      nub.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    }
+    pad.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      var r = pad.querySelector('.pad-ring').getBoundingClientRect();
+      padC = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      padId = e.pointerId;
+      pad.setPointerCapture(e.pointerId);
+      padSet(e.clientX, e.clientY);
+    });
+    pad.addEventListener('pointermove', function (e) {
+      if (padId !== e.pointerId) return;
+      padSet(e.clientX, e.clientY);
+    });
+    function padEnd(e) {
+      if (padId !== e.pointerId) return;
+      padId = null;
+      stick.on = false; stick.x = 0; stick.y = 0;
+      nub.style.transform = '';
+      saveSoon();
+    }
+    pad.addEventListener('pointerup', padEnd);
+    pad.addEventListener('pointercancel', padEnd);
+
+    $('#btn-jump').addEventListener('click', function () {
+      if (activeChar) activeChar.char.jump = true;
+    });
+    $('#btn-sit').addEventListener('click', function () {
+      if (activeChar) { activeChar.char.sitting = !activeChar.char.sitting; saveSoon(); }
+    });
   }
 
   /* ------------------------------------------------------------ 루프 */
@@ -6404,6 +7303,7 @@ window.THREE=module.exports;})();</script>
     var dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
     updateCharacters(dt, t);
     updateMusicObjects(dt, t);
+    updateBubble();
     if (selected) updateMarker();
     lights.key.target.position.set(0, 0, 0);
     lights.key.target.updateMatrixWorld();
