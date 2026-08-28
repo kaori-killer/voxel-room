@@ -27,6 +27,16 @@ export default function HomePage() {
           변환은 전부 브라우저 안에서 끝납니다.
         </p>
         <CreateRoomButton />
+        <video
+          className={styles.demo}
+          src="/demo.mp4"
+          poster="/demo-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label="복셀 공방으로 사진을 오브제로 깎아 방을 꾸미는 모습"
+        />
         <dl className={styles.features}>
           {FEATURES.map((feature) => (
             <div key={feature.term} className={styles.feature}>
