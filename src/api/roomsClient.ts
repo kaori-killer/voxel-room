@@ -1,3 +1,4 @@
+import { captureApiError } from '@/lib/monitoring';
 import type { RoomType } from '@/domain/types';
 import type {
   ChatListResType,
@@ -20,17 +21,26 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
-  });
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    });
+  } catch (error) {
+    captureApiError(error, { path });
+    throw error;
+  }
   const payload: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const message =
       payload && typeof payload === 'object' && 'error' in payload
         ? String((payload as { error: unknown }).error)
         : '요청에 실패했습니다';
-    throw new ApiError(message, response.status);
+    const apiError = new ApiError(message, response.status);
+    // 4xx 는 사용자·검증 사유라 리포트하지 않고, 서버 장애(5xx)만 캡쳐한다.
+    if (response.status >= 500) captureApiError(apiError, { path, status: response.status });
+    throw apiError;
   }
   return payload as T;
 }
