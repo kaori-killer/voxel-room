@@ -13,7 +13,9 @@ test.describe('방 만들기와 꾸미기', () => {
     expect(new URL(page.url()).pathname).toMatch(ROOM_ID_PATTERN);
 
     await expect(page.getByRole('button', { name: '사진으로 오브제 만들기' })).toBeVisible();
-    await expect(page.getByText('아직 오브제가 없습니다.')).toBeVisible();
+    // 새 방에는 기본 오브제(별·무드등·주크박스)가 미리 놓여 있다.
+    await expect(page.getByRole('button', { name: '반짝별 방에 꺼내기' })).toBeVisible();
+    await expect(page.locator('aside[aria-label="보관함"] li')).toHaveCount(3);
   });
 
   test('사진을 올리면 스튜디오가 열리고 보관함에 오브제가 담긴다', async ({ page }) => {
@@ -35,7 +37,8 @@ test.describe('방 만들기와 꾸미기', () => {
     await studio.getByRole('button', { name: '보관함에 넣고 방에 놓기' }).click();
     await expect(studio).toBeHidden();
 
-    await expect(page.getByRole('button', { name: /별 방에 꺼내기/ })).toBeVisible({ timeout: 20_000 });
+    // 시드 '반짝별' 과 겹치지 않도록 정확히 '별' 항목만 집는다.
+    await expect(page.getByRole('button', { name: '별 방에 꺼내기', exact: true })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole('toolbar')).toBeVisible();
   });
 
