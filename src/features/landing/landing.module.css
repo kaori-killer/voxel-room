@@ -30,7 +30,7 @@
 .card { position: relative; z-index: 1; width: min(560px, 100%); display: flex; flex-direction: column; gap: 22px; text-align: center; }
 .brand { display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
 .cube { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--accent) 0 50%, var(--teal) 50% 100%); box-shadow: var(--shadow-s); }
-.title { font-size: clamp(28px, 7vw, 40px); line-height: 1.15; font-family: '궁서', Gungsuh, GungsuhChe, Batang, AppleMyungjo, serif; }
+.title { font-size: clamp(28px, 7vw, 40px); line-height: 1.15; font-weight: 700; font-family: '궁서', Gungsuh, GungsuhChe, Batang, AppleMyungjo, serif; }
 .lead { color: var(--ink-2); font-size: 15.5px; line-height: 1.7; }
 .actions { display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .actions .btn { width: min(280px, 100%); }

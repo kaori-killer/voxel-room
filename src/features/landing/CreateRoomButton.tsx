@@ -13,6 +13,7 @@ const TITLE_MAX_LENGTH = 40;
 
 export function CreateRoomButton() {
   const router = useRouter();
+  const [step, setStep] = useState<'start' | 'name'>('start');
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,23 +41,32 @@ export function CreateRoomButton() {
 
   return (
     <form className={styles.actions} onSubmit={(event) => void handleSubmit(event)}>
-      <label className={styles.field}>
-        <span className={styles.fieldLabel}>방 이름</span>
-        <input
-          className={styles.input}
-          type="text"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="이름 없는 방"
-          maxLength={TITLE_MAX_LENGTH}
-          disabled={busy}
-          autoComplete="off"
-          enterKeyHint="go"
-        />
-      </label>
-      <button type="submit" className={`btn btn-primary ${styles.create}`} disabled={busy}>
-        {busy ? '방을 만드는 중…' : '내 방 만들기'}
-      </button>
+      {step === 'start' ? (
+        <button type="button" className={`btn btn-primary ${styles.create}`} onClick={() => setStep('name')}>
+          방 만들기
+        </button>
+      ) : (
+        <>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>방 이름</span>
+            <input
+              className={styles.input}
+              type="text"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="이름 없는 방"
+              maxLength={TITLE_MAX_LENGTH}
+              disabled={busy}
+              autoComplete="off"
+              enterKeyHint="go"
+              autoFocus
+            />
+          </label>
+          <button type="submit" className={`btn btn-primary ${styles.create}`} disabled={busy}>
+            {busy ? '방을 만드는 중…' : '만들기'}
+          </button>
+        </>
+      )}
       {error ? (
         <p className={styles.error} role="alert">
           {error}
