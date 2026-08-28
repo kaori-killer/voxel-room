@@ -1,4 +1,23 @@
-.page { min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px calc(32px + env(safe-area-inset-bottom, 0px)); }
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px calc(32px + env(safe-area-inset-bottom, 0px));
+  /* 동물의 숲 느낌: 맑은 하늘 + 햇살 + 잔디 언덕 */
+  background:
+    radial-gradient(150% 85% at 50% 128%, #6cc04f 0%, #86cf5f 26%, #a7de78 46%, rgba(167, 222, 120, 0) 64%),
+    radial-gradient(70% 45% at 50% 6%, rgba(255, 247, 199, 0.95) 0%, rgba(255, 247, 199, 0) 60%),
+    linear-gradient(180deg, #a6e4ef 0%, #c6eef2 40%, #eaf7e4 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme='light'])) .page {
+    background:
+      radial-gradient(150% 85% at 50% 128%, #274d2c 0%, #2f5c34 28%, #37683b 48%, rgba(55, 104, 59, 0) 66%),
+      radial-gradient(70% 45% at 50% 6%, rgba(120, 108, 60, 0.4) 0%, rgba(120, 108, 60, 0) 60%),
+      linear-gradient(180deg, #16303a 0%, #173229 55%, #17281e 100%);
+  }
+}
 .card { width: min(560px, 100%); display: flex; flex-direction: column; gap: 22px; text-align: center; }
 .brand { display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
 .cube { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--accent) 0 50%, var(--teal) 50% 100%); box-shadow: var(--shadow-s); }
