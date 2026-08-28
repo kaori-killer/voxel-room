@@ -1,5 +1,11 @@
 export type PianoKeyType = {
+  /**
+   * 물리 키 위치(KeyboardEvent.code). 자판 배열·한글 IME 와 무관하게 눌린 자리를
+   * 가리키므로, 키 입력은 e.key 가 아니라 이 값으로 맞춘다.
+   */
   code: string;
+  /** 화면 건반에 표시하는 글자. QWERTY 물리 위치 기준. */
+  hint: string;
   semitone: number;
   black: boolean;
   label: string;
@@ -7,23 +13,23 @@ export type PianoKeyType = {
 
 /** 도부터 다음 옥타브 미까지 — 한 손으로 닿는 범위만 낸다. */
 export const PIANO_KEYS: readonly PianoKeyType[] = [
-  { code: 'a', semitone: 0, black: false, label: '도' },
-  { code: 'w', semitone: 1, black: true, label: '도♯' },
-  { code: 's', semitone: 2, black: false, label: '레' },
-  { code: 'e', semitone: 3, black: true, label: '레♯' },
-  { code: 'd', semitone: 4, black: false, label: '미' },
-  { code: 'f', semitone: 5, black: false, label: '파' },
-  { code: 't', semitone: 6, black: true, label: '파♯' },
-  { code: 'g', semitone: 7, black: false, label: '솔' },
-  { code: 'y', semitone: 8, black: true, label: '솔♯' },
-  { code: 'h', semitone: 9, black: false, label: '라' },
-  { code: 'u', semitone: 10, black: true, label: '라♯' },
-  { code: 'j', semitone: 11, black: false, label: '시' },
-  { code: 'k', semitone: 12, black: false, label: '도' },
-  { code: 'o', semitone: 13, black: true, label: '도♯' },
-  { code: 'l', semitone: 14, black: false, label: '레' },
-  { code: 'p', semitone: 15, black: true, label: '레♯' },
-  { code: ';', semitone: 16, black: false, label: '미' },
+  { code: 'KeyA', hint: 'A', semitone: 0, black: false, label: '도' },
+  { code: 'KeyW', hint: 'W', semitone: 1, black: true, label: '도♯' },
+  { code: 'KeyS', hint: 'S', semitone: 2, black: false, label: '레' },
+  { code: 'KeyE', hint: 'E', semitone: 3, black: true, label: '레♯' },
+  { code: 'KeyD', hint: 'D', semitone: 4, black: false, label: '미' },
+  { code: 'KeyF', hint: 'F', semitone: 5, black: false, label: '파' },
+  { code: 'KeyT', hint: 'T', semitone: 6, black: true, label: '파♯' },
+  { code: 'KeyG', hint: 'G', semitone: 7, black: false, label: '솔' },
+  { code: 'KeyY', hint: 'Y', semitone: 8, black: true, label: '솔♯' },
+  { code: 'KeyH', hint: 'H', semitone: 9, black: false, label: '라' },
+  { code: 'KeyU', hint: 'U', semitone: 10, black: true, label: '라♯' },
+  { code: 'KeyJ', hint: 'J', semitone: 11, black: false, label: '시' },
+  { code: 'KeyK', hint: 'K', semitone: 12, black: false, label: '도' },
+  { code: 'KeyO', hint: 'O', semitone: 13, black: true, label: '도♯' },
+  { code: 'KeyL', hint: 'L', semitone: 14, black: false, label: '레' },
+  { code: 'KeyP', hint: 'P', semitone: 15, black: true, label: '레♯' },
+  { code: 'Semicolon', hint: ';', semitone: 16, black: false, label: '미' },
 ];
 
 export const PIANO_KEY_BY_CODE = new Map(PIANO_KEYS.map((key) => [key.code, key]));

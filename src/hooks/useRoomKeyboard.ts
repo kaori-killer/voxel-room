@@ -12,11 +12,13 @@ export type UseRoomKeyboardParams = {
   onDeselect: () => void;
 };
 
-/** 한글 자판이 켜져 있어도 걷도록 같은 자리의 낱자를 함께 받는다. */
+/**
+ * 물리 키 위치(KeyboardEvent.code)로 맞춘다. 자판 배열·한글 IME 와 무관하므로
+ * 한글이 켜져 있어도 걷고, 자모 낱자를 따로 받을 필요가 없다.
+ */
 const MOVE_KEY_MAP: Record<string, 'w' | 'a' | 's' | 'd'> = {
-  w: 'w', a: 'a', s: 's', d: 'd',
-  arrowup: 'w', arrowleft: 'a', arrowdown: 's', arrowright: 'd',
-  ㅈ: 'w', ㅁ: 'a', ㄴ: 's', ㅇ: 'd',
+  KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd',
+  ArrowUp: 'w', ArrowLeft: 'a', ArrowDown: 's', ArrowRight: 'd',
 };
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -40,39 +42,39 @@ export function useRoomKeyboard(params: UseRoomKeyboardParams): void {
 
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (isTypingTarget(event.target)) return;
-      const key = event.key.toLowerCase();
-      if (key === 'escape') {
+      const code = event.code;
+      if (code === 'Escape') {
         paramsRef.current.onDeselect();
         return;
       }
-      const move = MOVE_KEY_MAP[key];
+      const move = MOVE_KEY_MAP[code];
       if (move) {
         held.add(move);
         emit();
         event.preventDefault();
         return;
       }
-      if (key === ' ') {
+      if (code === 'Space') {
         paramsRef.current.onJump();
         event.preventDefault();
         return;
       }
-      if (key === 'z' || key === 'ㅋ') {
+      if (code === 'KeyZ') {
         paramsRef.current.onToggleSit();
         return;
       }
-      if (key === 'r' || key === 'ㄱ') {
+      if (code === 'KeyR') {
         paramsRef.current.onRotate(event.shiftKey ? -1 : 1);
         return;
       }
-      if (key === 'delete' || key === 'backspace') {
+      if (code === 'Delete' || code === 'Backspace') {
         paramsRef.current.onRemove();
         event.preventDefault();
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent): void => {
-      const move = MOVE_KEY_MAP[event.key.toLowerCase()];
+      const move = MOVE_KEY_MAP[event.code];
       if (!move) return;
       held.delete(move);
       emit();
