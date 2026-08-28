@@ -65,4 +65,47 @@ export function sendChat(roomId: string, body: SendChatReqType): Promise<SendCha
   return request(`/api/rooms/${roomId}/chat`, { method: 'POST', body: JSON.stringify(body) });
 }
 
+/** 재생에 쓰는 안정적인 경로. 서버가 서명 URL 로 302 리다이렉트한다. */
+export function trackSrc(roomId: string, trackId: string): string {
+  return `/api/rooms/${roomId}/tracks/${trackId}`;
+}
+
+/**
+ * 서버에서 서명 업로드 URL 을 받아, 파일 바이트는 브라우저가 Supabase 로 직접 PUT 한다.
+ * (서버 라우트를 바이트가 지나지 않아 배포 플랫폼의 본문 크기 제한을 피한다.)
+ */
+export async function uploadTrack(
+  roomId: string,
+  trackId: string,
+  ownerKeyHash: string,
+  file: File,
+): Promise<void> {
+  const { uploadUrl } = await request<{ uploadUrl: string }>(`/api/rooms/${roomId}/tracks`, {
+    method: 'POST',
+    body: JSON.stringify({ trackId, ownerKeyHash }),
+  });
+  let response: Response;
+  try {
+    response = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true' },
+      body: file,
+    });
+  } catch (error) {
+    captureApiError(error, { path: 'PUT storage upload' });
+    throw error;
+  }
+  if (!response.ok) throw new ApiError('음악 업로드에 실패했습니다', response.status);
+}
+
+export async function deleteTrack(roomId: string, trackId: string, ownerKeyHash: string): Promise<void> {
+  const response = await fetch(`/api/rooms/${roomId}/tracks/${trackId}`, {
+    method: 'DELETE',
+    headers: { 'x-owner-key-hash': ownerKeyHash },
+  });
+  if (!response.ok && response.status !== 204) {
+    throw new ApiError('음악 삭제에 실패했습니다', response.status);
+  }
+}
+
 export type { RoomType };

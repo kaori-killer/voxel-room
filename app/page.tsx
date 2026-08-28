@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { CreateRoomButton } from '@/features/landing/CreateRoomButton';
+import { VoxelParade } from '@/features/landing/VoxelParade';
 import styles from '@/features/landing/landing.module.css';
 
 export const metadata: Metadata = {
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <main className={styles.page}>
+      <VoxelParade />
       <div className={styles.card}>
         <header className={styles.brand}>
           <h1 className={styles.title}>복셀 공방</h1>

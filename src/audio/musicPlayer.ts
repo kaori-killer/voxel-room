@@ -28,6 +28,9 @@ export class MusicPlayer {
 
   onMissingTrack: MissingTrackHandlerType | null = null;
 
+  /** 로컬(IndexedDB)에 파일이 없을 때 대신 재생할 서버 URL 을 만들어 준다. 공유 방에서만 설정된다. */
+  remoteUrlFor: ((trackId: string) => string) | null = null;
+
   constructor(audio: HTMLAudioElement = new Audio()) {
     this.audio = audio;
     this.audio.preload = 'metadata';
@@ -77,17 +80,30 @@ export class MusicPlayer {
   async play(itemId: string, tracks: TrackItemType[], index: number): Promise<void> {
     const track = tracks[index];
     if (!track) return;
+
+    if (this.objectUrl) {
+      URL.revokeObjectURL(this.objectUrl);
+      this.objectUrl = null;
+    }
+
+    // 내 브라우저에 파일이 있으면 그걸, 없으면(공유받은 방 등) 서버에서 스트리밍한다.
     const blob = await this.store.get(track.id);
-    if (!blob) {
+    let src: string | null = null;
+    if (blob) {
+      this.objectUrl = URL.createObjectURL(blob);
+      src = this.objectUrl;
+    } else if (this.remoteUrlFor) {
+      src = this.remoteUrlFor(track.id);
+    }
+    if (!src) {
       this.onMissingTrack?.(track);
       return;
     }
-    if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
-    this.objectUrl = URL.createObjectURL(blob);
+
     this.itemId = itemId;
     this.tracks = tracks;
     this.index = index;
-    this.audio.src = this.objectUrl;
+    this.audio.src = src;
     await this.audio.play().catch(() => undefined);
     this.emit();
   }

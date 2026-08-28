@@ -18,3 +18,11 @@ export function isSharingEnabled(): boolean {
 
 export type { RoomStoreType, StoredRoomType } from './roomStore';
 export { RoomForbiddenError, RoomNotFoundError } from './roomStore';
+export { readSupabaseConfig, verifyRoomOwner } from './supabaseRoomStore';
+export type { SupabaseConfigType } from './supabaseRoomStore';
+export {
+  createTrackDownloadUrl,
+  createTrackUploadUrl,
+  deleteTrackBlob,
+  ensureTrackBucket,
+} from './trackBlobStore';

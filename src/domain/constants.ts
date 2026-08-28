@@ -92,3 +92,6 @@ export const ROOM_PALETTE_MAP: Record<RoomPaletteType, PaletteColorsType> = {
 
 export const MAX_CHAT_BODY_LENGTH = 800;
 export const CHAT_PAGE_SIZE = 100;
+
+/** 음악 파일 1개 최대 크기. 서버·클라이언트가 같은 값으로 막는다. */
+export const MAX_TRACK_BYTES = 20 * 1024 * 1024;
